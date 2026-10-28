@@ -52,7 +52,7 @@ struct AppButton: View {
     
     var body: some View {
         Button {
-            
+            onClick()
         } label: {
             VStack {
                 Text(label)

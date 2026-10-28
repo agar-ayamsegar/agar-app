@@ -6,6 +6,10 @@
 	objectVersion = 110;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		C86F21EB3091D2D1000ABBEE /* AsyncBluetooth in Frameworks */ = {isa = PBXBuildFile; productRef = C86F21EA3091D2D1000ABBEE /* AsyncBluetooth */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		C838198F308CED86005A3D92 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -29,9 +33,22 @@
 		C8381998308CED86005A3D92 /* AgarUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AgarUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		C86F21E83091CF6E000ABBEE /* Exceptions for "Agar" folder in "Agar" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = C8381980308CED85005A3D92 /* Agar */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		C8381983308CED85005A3D92 /* Agar */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C86F21E83091CF6E000ABBEE /* Exceptions for "Agar" folder in "Agar" target */,
+			);
 			path = Agar;
 			sourceTree = "<group>";
 		};
@@ -51,6 +68,7 @@
 		C838197E308CED85005A3D92 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
+				C86F21EB3091D2D1000ABBEE /* AsyncBluetooth in Frameworks */,
 			);
 		};
 		C838198B308CED86005A3D92 /* Frameworks */ = {
@@ -103,6 +121,9 @@
 				C8381983308CED85005A3D92 /* Agar */,
 			);
 			name = Agar;
+			packageProductDependencies = (
+				C86F21EA3091D2D1000ABBEE /* AsyncBluetooth */,
+			);
 			productName = Agar;
 			productReference = C8381981308CED85005A3D92 /* Agar.app */;
 			productType = "com.apple.product-type.application";
@@ -181,6 +202,9 @@
 			);
 			mainGroup = C8381978308CED85005A3D92;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				C86F21E93091D2D1000ABBEE /* XCRemoteSwiftPackageReference "AsyncBluetooth" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C8381982308CED85005A3D92 /* Products */;
 			projectDirPath = "";
@@ -374,8 +398,10 @@
 				DEVELOPMENT_TEAM = HK5U3FU2AP;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Agar/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Agar;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Agar need access of your bluetooth to use the app";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -412,8 +438,10 @@
 				DEVELOPMENT_TEAM = HK5U3FU2AP;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Agar/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Agar;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Agar need access of your bluetooth to use the app";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -560,6 +588,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C86F21E93091D2D1000ABBEE /* XCRemoteSwiftPackageReference "AsyncBluetooth" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/manolofdez/AsyncBluetooth";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.2.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C86F21EA3091D2D1000ABBEE /* AsyncBluetooth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C86F21E93091D2D1000ABBEE /* XCRemoteSwiftPackageReference "AsyncBluetooth" */;
+			productName = AsyncBluetooth;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = C8381979308CED85005A3D92 /* Project object */;
 	validationLevel = 1;
