@@ -9,7 +9,7 @@ import SwiftUI
 
 
 struct ConnectScreen: View {
-    @Environment(BluetoothViewModel.self) var bluetoothVM
+    @Environment(BluetoothViewModel<Sensor>.self) var bluetoothVM
     
     var body: some View {
         VStack {
@@ -25,7 +25,7 @@ struct ConnectScreen: View {
             }
             
             ForEach(bluetoothVM.characteristics.suffix(10), id: \.self) { data in
-                Text(data)
+                Text("mq_137: \(data.mq137), mq_135: \(data.mq135), rs_137: \(data.rs137), rs_135: \(data.rs135), temp: \(data.temp), humidity: \(data.humidity)")
                     .font(.body)
                     .bold()
             }
@@ -38,5 +38,5 @@ struct ConnectScreen: View {
 
 #Preview {
     ConnectScreen()
-        .environment(BluetoothViewModel())
+        .environment(BluetoothViewModel<Sensor>())
 }

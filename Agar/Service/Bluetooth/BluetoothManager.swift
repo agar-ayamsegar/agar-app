@@ -9,7 +9,14 @@ import AsyncBluetooth
 import CoreBluetooth
 import Combine
 
-class BluetoothManager {
+
+protocol IBluetoothManager {
+    func connect() async throws
+    func readCharacteristics(onData: @escaping (String) -> Void) async throws
+}
+
+
+class BluetoothManager: IBluetoothManager {
     var centralManager: CentralManager?
     var peripheral: Peripheral?
     
@@ -37,7 +44,6 @@ class BluetoothManager {
         }
         
         guard let peripheral = peripheral else { return }
-        
         try await centralManager.connect(peripheral)
     }
     

@@ -15,17 +15,26 @@ enum BluetoothState {
         error(String)
 }
 
+
+protocol IBluetoothViewModel {
+    associatedtype T: Decodable
+    
+    func connect() async
+    func readData(characteristic: String)
+    func getJson(value: String) throws -> T?
+}
+
 @Observable
-class BluetoothViewModel {
+class BluetoothViewModel<T: Decodable> {
     // MARK: - bluetooth manager coming from services
-    private var bluetoothManager: BluetoothManager?
+    private var bluetoothManager: IBluetoothManager?
     
     
     // MARK: - state variable
     private(set) var state: BluetoothState = .idle
-    private(set) var characteristics: [String] = []
+    private(set) var characteristics: [T] = []
     
-    init(bluetoothManager: BluetoothManager = BluetoothManager()) {
+    init(bluetoothManager: IBluetoothManager = BluetoothManager()) {
         self.bluetoothManager = bluetoothManager
     }
     
@@ -41,6 +50,22 @@ class BluetoothViewModel {
     }
         
     func readData(characteristic: String) {
-        characteristics.append(characteristic)
+        guard characteristic != "" else { return }
+        
+        do {
+            let sensor = try getJson(value: characteristic)
+            guard let sensor = sensor else { return }
+            characteristics.append(sensor)
+        } catch {
+            state = .error(error.localizedDescription)
+        }
+    }
+    
+    func getJson(value: String) throws -> T? {
+        guard let v = value.data(using: .utf8) else { return nil }
+        
+        let decoder = JSONDecoder()
+        let sensor = try decoder.decode(T.self, from: v)
+        return sensor
     }
 }

@@ -10,7 +10,7 @@ import SwiftUI
 
 struct MainScreen: View {
     @State var pageStateVM: PageStateViewModel = PageStateViewModel()
-    @State var bluetoothVM: BluetoothViewModel = BluetoothViewModel()
+    @State var bluetoothVM: BluetoothViewModel<Sensor> = BluetoothViewModel()
     
     var body: some View {
         VStack {
