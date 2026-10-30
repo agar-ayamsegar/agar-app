@@ -63,7 +63,6 @@ class BluetoothViewModel<T: Decodable> {
     
     func getJson(value: String) throws -> T? {
         guard let v = value.data(using: .utf8) else { return nil }
-        
         let decoder = JSONDecoder()
         let sensor = try decoder.decode(T.self, from: v)
         return sensor
