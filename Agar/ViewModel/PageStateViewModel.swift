@@ -11,13 +11,14 @@ import SwiftUI
 enum PageState {
     // TODO: add more on page
     case home
+    case session(ScanSession)
     case connect
 }
 
 @Observable
 class PageStateViewModel {
-    private(set) var state: PageState = .connect
-    
+    private(set) var state: PageState = .home
+
     func setState(_ state: PageState) {
         self.state = state
     }
