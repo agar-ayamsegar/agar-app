@@ -8,6 +8,13 @@
 
 /* Begin PBXBuildFile section */
 		C86F21EB3091D2D1000ABBEE /* AsyncBluetooth in Frameworks */ = {isa = PBXBuildFile; productRef = C86F21EA3091D2D1000ABBEE /* AsyncBluetooth */; };
+		FD2FA09E3099E17E003AE4FE /* MLX in Frameworks */ = {isa = PBXBuildFile; productRef = FD2FA09D3099E17E003AE4FE /* MLX */; };
+		FD2FA0A03099E17E003AE4FE /* MLXFast in Frameworks */ = {isa = PBXBuildFile; productRef = FD2FA09F3099E17E003AE4FE /* MLXFast */; };
+		FD2FA0A23099E17E003AE4FE /* MLXFFT in Frameworks */ = {isa = PBXBuildFile; productRef = FD2FA0A13099E17E003AE4FE /* MLXFFT */; };
+		FD2FA0A43099E17E003AE4FE /* MLXLinalg in Frameworks */ = {isa = PBXBuildFile; productRef = FD2FA0A33099E17E003AE4FE /* MLXLinalg */; };
+		FD2FA0A63099E17E003AE4FE /* MLXNN in Frameworks */ = {isa = PBXBuildFile; productRef = FD2FA0A53099E17E003AE4FE /* MLXNN */; };
+		FD2FA0A83099E17E003AE4FE /* MLXOptimizers in Frameworks */ = {isa = PBXBuildFile; productRef = FD2FA0A73099E17E003AE4FE /* MLXOptimizers */; };
+		FD2FA0AA3099E17E003AE4FE /* MLXRandom in Frameworks */ = {isa = PBXBuildFile; productRef = FD2FA0A93099E17E003AE4FE /* MLXRandom */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -68,7 +75,14 @@
 		C838197E308CED85005A3D92 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
+				FD2FA0A63099E17E003AE4FE /* MLXNN in Frameworks */,
+				FD2FA0A43099E17E003AE4FE /* MLXLinalg in Frameworks */,
+				FD2FA0A03099E17E003AE4FE /* MLXFast in Frameworks */,
+				FD2FA0AA3099E17E003AE4FE /* MLXRandom in Frameworks */,
+				FD2FA09E3099E17E003AE4FE /* MLX in Frameworks */,
+				FD2FA0A83099E17E003AE4FE /* MLXOptimizers in Frameworks */,
 				C86F21EB3091D2D1000ABBEE /* AsyncBluetooth in Frameworks */,
+				FD2FA0A23099E17E003AE4FE /* MLXFFT in Frameworks */,
 			);
 		};
 		C838198B308CED86005A3D92 /* Frameworks */ = {
@@ -90,6 +104,7 @@
 				C8381983308CED85005A3D92 /* Agar */,
 				C8381991308CED86005A3D92 /* AgarTests */,
 				C838199B308CED86005A3D92 /* AgarUITests */,
+				FD2FA09C3099E17E003AE4FE /* Frameworks */,
 				C8381982308CED85005A3D92 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -102,6 +117,13 @@
 				C8381998308CED86005A3D92 /* AgarUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		FD2FA09C3099E17E003AE4FE /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -123,6 +145,13 @@
 			name = Agar;
 			packageProductDependencies = (
 				C86F21EA3091D2D1000ABBEE /* AsyncBluetooth */,
+				FD2FA09D3099E17E003AE4FE /* MLX */,
+				FD2FA09F3099E17E003AE4FE /* MLXFast */,
+				FD2FA0A13099E17E003AE4FE /* MLXFFT */,
+				FD2FA0A33099E17E003AE4FE /* MLXLinalg */,
+				FD2FA0A53099E17E003AE4FE /* MLXNN */,
+				FD2FA0A73099E17E003AE4FE /* MLXOptimizers */,
+				FD2FA0A93099E17E003AE4FE /* MLXRandom */,
 			);
 			productName = Agar;
 			productReference = C8381981308CED85005A3D92 /* Agar.app */;
@@ -204,6 +233,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				C86F21E93091D2D1000ABBEE /* XCRemoteSwiftPackageReference "AsyncBluetooth" */,
+				FD777B253092005F00ACB317 /* XCRemoteSwiftPackageReference "mlx-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C8381982308CED85005A3D92 /* Products */;
@@ -395,7 +425,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 3;
-				DEVELOPMENT_TEAM = HK5U3FU2AP;
+				DEVELOPMENT_TEAM = P9RHX8FDH9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Agar/Info.plist;
@@ -413,7 +443,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.agar.swift.board.Agar;
+				PRODUCT_BUNDLE_IDENTIFIER = com.agar.swift.board.Agar.Joren;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -436,7 +466,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 3;
-				DEVELOPMENT_TEAM = HK5U3FU2AP;
+				DEVELOPMENT_TEAM = P9RHX8FDH9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Agar/Info.plist;
@@ -454,7 +484,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.agar.swift.board.Agar;
+				PRODUCT_BUNDLE_IDENTIFIER = com.agar.swift.board.Agar.Joren;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -600,6 +630,14 @@
 				minimumVersion = 6.2.2;
 			};
 		};
+		FD777B253092005F00ACB317 /* XCRemoteSwiftPackageReference "mlx-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ml-explore/mlx-swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.33.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -607,6 +645,41 @@
 			isa = XCSwiftPackageProductDependency;
 			package = C86F21E93091D2D1000ABBEE /* XCRemoteSwiftPackageReference "AsyncBluetooth" */;
 			productName = AsyncBluetooth;
+		};
+		FD2FA09D3099E17E003AE4FE /* MLX */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FD777B253092005F00ACB317 /* XCRemoteSwiftPackageReference "mlx-swift" */;
+			productName = MLX;
+		};
+		FD2FA09F3099E17E003AE4FE /* MLXFast */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FD777B253092005F00ACB317 /* XCRemoteSwiftPackageReference "mlx-swift" */;
+			productName = MLXFast;
+		};
+		FD2FA0A13099E17E003AE4FE /* MLXFFT */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FD777B253092005F00ACB317 /* XCRemoteSwiftPackageReference "mlx-swift" */;
+			productName = MLXFFT;
+		};
+		FD2FA0A33099E17E003AE4FE /* MLXLinalg */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FD777B253092005F00ACB317 /* XCRemoteSwiftPackageReference "mlx-swift" */;
+			productName = MLXLinalg;
+		};
+		FD2FA0A53099E17E003AE4FE /* MLXNN */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FD777B253092005F00ACB317 /* XCRemoteSwiftPackageReference "mlx-swift" */;
+			productName = MLXNN;
+		};
+		FD2FA0A73099E17E003AE4FE /* MLXOptimizers */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FD777B253092005F00ACB317 /* XCRemoteSwiftPackageReference "mlx-swift" */;
+			productName = MLXOptimizers;
+		};
+		FD2FA0A93099E17E003AE4FE /* MLXRandom */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FD777B253092005F00ACB317 /* XCRemoteSwiftPackageReference "mlx-swift" */;
+			productName = MLXRandom;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

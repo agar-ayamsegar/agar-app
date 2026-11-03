@@ -1,5 +1,5 @@
 {
-  "originHash" : "911fb96da7e1e0d3cbd2be9a7a7fc88117d491621717bf4f4d6df5d4afe9ee52",
+  "originHash" : "0afbefca20febfe6df4005f9b05cd02a818de483009763686633cdc7f42de1dd",
   "pins" : [
     {
       "identity" : "asyncbluetooth",
@@ -8,6 +8,24 @@
       "state" : {
         "revision" : "41c229ff655ae4d25b4db22c914fd200180dc08c",
         "version" : "6.2.2"
+      }
+    },
+    {
+      "identity" : "mlx-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ml-explore/mlx-swift.git",
+      "state" : {
+        "revision" : "7ede4fd6d05f63305c1c0ebf4f8c1909a637c574",
+        "version" : "0.33.0"
+      }
+    },
+    {
+      "identity" : "swift-numerics",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-numerics",
+      "state" : {
+        "revision" : "0c0290ff6b24942dadb83a929ffaaa1481df04a2",
+        "version" : "1.1.1"
       }
     }
   ],
