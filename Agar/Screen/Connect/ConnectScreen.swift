@@ -1,9 +1,14 @@
+//
+//  ConnectScreen.swift
+//  Agar
+//
+//  Created by Bee Wijaya on 27/10/26.
+//
 
 
 import SwiftUI
 
 
-// MARK: - dummy data
 
 enum Fake {
 
