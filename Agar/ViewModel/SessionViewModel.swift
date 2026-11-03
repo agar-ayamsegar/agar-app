@@ -37,6 +37,4 @@ class SessionViewModel {
     func retry() {
         machineState = .preparing(progress: 0)
     }
-    
-    
 }
