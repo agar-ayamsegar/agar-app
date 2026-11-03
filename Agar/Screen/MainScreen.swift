@@ -24,7 +24,11 @@ struct MainScreen: View {
                 SessionScreen(viewModel: SessionViewModel(session: session)) {
                     pageStateVM.setState(.home)
                 } onEnd: { finishedSession in
-                    recapVM.add(finishedSession)
+                    pageStateVM.setState(.summary(finishedSession))
+                }
+            case .summary(let session):
+                SessionSummaryScreen(session: session) {
+                    recapVM.add(session)
                     pageStateVM.setState(.home)
                 }
             case .connect:

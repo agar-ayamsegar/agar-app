@@ -13,4 +13,5 @@ enum MachineState: Sendable, Hashable {
     case ready
     case scanning(chickenNumber: Int, progress: Double)
     case result(ScanRecord)
+    case nextChicken
 }

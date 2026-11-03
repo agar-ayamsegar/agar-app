@@ -12,6 +12,7 @@ enum PageState {
     // TODO: add more on page
     case home
     case session(ScanSession)
+    case summary(ScanSession)
     case connect
 }
 
