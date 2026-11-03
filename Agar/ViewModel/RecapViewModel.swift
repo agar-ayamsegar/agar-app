@@ -12,19 +12,30 @@ import SwiftUI
 class RecapViewModel {
     // MARK: - state variable
     private(set) var sessions: [ScanSession]
-    var searchQuery: String = ""
+   
+    var selectedDate: Date = .now
+    var selectedSessionID: ScanSession.ID?
+
+    var recordFilter: Freshness?
 
     init(sessions: [ScanSession] = []) {
         self.sessions = sessions
     }
 
-    // "16 Oktober 2026" format
     var filteredSessions: [ScanSession] {
-        let query = searchQuery.trimmingCharacters(in: .whitespaces)
-        guard !query.isEmpty else { return sessions }
+        sessions.filter { Calendar.current.isDate($0.startedAt, inSameDayAs: selectedDate) }
+    }
 
-        let dateStyle = Date.FormatStyle.dateTime.day().month(.wide).year().locale(Locale(identifier: "id_ID"))
-        return sessions.filter { $0.startedAt.formatted(dateStyle).localizedCaseInsensitiveContains(query) }
+
+    var selectedSession: ScanSession? {
+        filteredSessions.first { $0.id == selectedSessionID } ?? filteredSessions.first
+    }
+
+    var filteredRecords: [ScanRecord] {
+        guard let records = selectedSession?.records else { return [] }
+        guard let recordFilter else { return records }
+
+        return records.filter { $0.freshness == recordFilter }
     }
 
     func makeSession() -> ScanSession {
@@ -33,6 +44,9 @@ class RecapViewModel {
     }
 
     func add(_ session: ScanSession) {
-        sessions.insert(session, at: 0)
+        sessions.append(session)
+        selectedDate = session.startedAt
+        selectedSessionID = session.id
+        recordFilter = nil
     }
 }
