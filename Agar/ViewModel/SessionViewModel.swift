@@ -24,13 +24,19 @@ class SessionViewModel {
         switch machineState {
         case .preparing, .connectionFailed:
             return false
-        case .ready, .scanning, .result:
+        case .ready, .scanning, .result, .nextChicken:
             return true
         }
     }
 
     var canRetry: Bool {
         machineState == .connectionFailed
+    }
+
+
+    func endSession() -> ScanSession {
+        session.endedAt = .now
+        return session
     }
 
     // TODO: hook into BluetoothViewModel to reconnect

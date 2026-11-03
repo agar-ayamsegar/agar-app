@@ -29,6 +29,8 @@ extension SessionScreen {
                     scanning(chickenNumber: chickenNumber, progress: progress)
                 case .result(let record):
                     result(record)
+                case .nextChicken:
+                    nextChicken
                 }
             }
             .padding(32)
@@ -42,7 +44,7 @@ extension SessionScreen {
         switch viewModel.machineState {
         case .result(let record):
             return record.freshness.tint
-        case .preparing, .connectionFailed, .ready, .scanning:
+        case .preparing, .connectionFailed, .ready, .scanning, .nextChicken:
             return .white
         }
     }
@@ -102,6 +104,15 @@ extension SessionScreen {
     
     }
 
+    // same look as ready, different text
+    var nextChicken: some View {
+        VStack(spacing: 8) {
+            headline(caption: "Masukkan", title: "Ayam Selanjutnya")
+
+            ChickenIllustration(pose: .ready, height: 420)
+        }
+    }
+
     func scanning(chickenNumber: Int, progress: Double) -> some View {
         VStack(spacing: 16) {
             headline(caption: "Ayam #\(chickenNumber)", title: "Sedang Memindai")
@@ -142,7 +153,7 @@ extension SessionScreen {
             history
 
             Button {
-                onEnd(viewModel.session)
+                onEnd(viewModel.endSession())
             } label: {
                 Text("Akhiri Sesi")
                     .frame(maxWidth: .infinity)
@@ -176,41 +187,14 @@ extension SessionScreen {
 
     var stats: some View {
         VStack(spacing: 8) {
-            statCard(title: "Ayam Masuk", value: viewModel.session.totalCount, valueSize: 44)
+            StatCard(title: "Ayam Masuk", value: Text("\(viewModel.session.totalCount)"), valueSize: 44)
 
             HStack(spacing: 8) {
-                statCard(freshness: .fresh, value: viewModel.session.freshCount)
-                statCard(freshness: .notFresh, value: viewModel.session.notFreshCount)
+                StatCard(freshness: .fresh, value: viewModel.session.freshCount)
+                StatCard(freshness: .notFresh, value: viewModel.session.notFreshCount)
             }
         }
         .animation(.default, value: viewModel.session.totalCount)
-    }
-
-    func statCard(freshness: Freshness, value: Int) -> some View {
-        statCard(title: freshness.title, value: value, tint: freshness.tint, background: freshness.lightTint)
-    }
-
-    func statCard(
-        title: String,
-        value: Int,
-        valueSize: CGFloat = 24,
-        tint: Color = .black,
-        background: Color = .cardGray
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(title)
-                .font(.caption)
-                .foregroundStyle(tint.opacity(0.75))
-
-            Text("\(value)")
-                .font(.system(size: valueSize, weight: .bold))
-                .foregroundStyle(tint)
-                .contentTransition(.numericText())
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(background, in: .rect(cornerRadius: 16))
     }
 
     var history: some View {

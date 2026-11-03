@@ -56,4 +56,11 @@ enum Freshness: String, Sendable, Hashable, CaseIterable {
             return "Pisahkan Ayam ini !"
         }
     }
+    var referenceRanges: [(label: String, range: String)] {
+        [
+            ("Kelembapan", "… - …"),
+            ("Gas", "… - …"),
+            ("Suhu", "… - …"),
+        ]
+    }
 }

@@ -76,6 +76,18 @@ struct SessionScreen: View {
     )
 }
 
+#Preview("Next Chicken", traits: .landscapeLeft) {
+    let session = ScanSession(number: 137, records: (1...65).map {
+        ScanRecord(chickenNumber: $0, freshness: $0.isMultiple(of: 30) ? .notFresh : .fresh)
+    })
+
+    SessionScreen(
+        viewModel: SessionViewModel(session: session, machineState: .nextChicken),
+        onBack: {},
+        onEnd: { _ in }
+    )
+}
+
 #Preview("Not Fresh", traits: .landscapeLeft) {
     let session = ScanSession(number: 137, records: (1...65).map {
         ScanRecord(chickenNumber: $0, freshness: $0.isMultiple(of: 30) ? .notFresh : .fresh)
