@@ -9,7 +9,7 @@ import SwiftUI
 
 
 struct MainScreen: View {
-    @State var pageStateVM: PageStateViewModel = PageStateViewModel()
+    @State var pageStateVM: PageStateViewModel = PageStateViewModel(state: .connect)
     @State var bluetoothVM: BluetoothViewModel<Sensor> = BluetoothViewModel()
     @State var recapVM: RecapViewModel = RecapViewModel()
 

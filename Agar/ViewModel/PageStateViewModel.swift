@@ -17,7 +17,11 @@ enum PageState {
 
 @Observable
 class PageStateViewModel {
-    private(set) var state: PageState = .home
+    private(set) var state: PageState
+    
+    init(state: PageState = .home){
+        self.state = state
+    }
 
     func setState(_ state: PageState) {
         self.state = state
