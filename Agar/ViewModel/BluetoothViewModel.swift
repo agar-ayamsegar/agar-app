@@ -60,6 +60,9 @@ class BluetoothViewModel<T: Decodable> {
             state = .error(error.localizedDescription)
         }
     }
+    func clear(){
+        characteristics.removeAll()
+    }
     
     func getJson(value: String) throws -> T? {
         guard let v = value.data(using: .utf8) else { return nil }
