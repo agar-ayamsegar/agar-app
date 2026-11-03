@@ -16,4 +16,5 @@ enum ChickenPose: String, CaseIterable {
     case scanning = "ChickenScanning"
     case fresh = "ChickenFresh"
     case notFresh = "ChickenNotFresh"
+    case done = "ChickenDone"
 }
