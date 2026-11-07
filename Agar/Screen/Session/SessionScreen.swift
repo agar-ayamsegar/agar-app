@@ -8,7 +8,10 @@
 import SwiftUI
 
 struct SessionScreen: View {
+    private static let baselineRows = FreshnessModel.rowsPerWindow + 7
+    @Environment(BluetoothViewModel<Sensor>.self) var bluetoothVM
     @State var viewModel: SessionViewModel
+    @Environment(FreshnessViewModel.self) var freshnessVM
     var onBack: () -> Void
     var onEnd: (ScanSession) -> Void
 
@@ -31,6 +34,64 @@ struct SessionScreen: View {
                 .toolbar(.hidden, for: .navigationBar)
         }
         .navigationSplitViewStyle(.balanced)
+        .task(id: viewModel.attempt) {
+            await prepareMachine()
+        }
+    }
+
+    // the operator says the box is empty by getting here, so the baseline is taken from now on
+        private func prepareMachine() async {
+        // the baseline is kept for as long as the app runs, restart the iPad to take a new one
+        guard freshnessVM.needsBaseline else {
+            print("[session] baseline already taken")
+            viewModel.machineReady()
+            await readChicken()
+            return
+        }
+
+        // rows from before this screen could be anything, the empty box starts counting now
+        bluetoothVM.clear()
+        await collectBaselineRows()
+        guard !Task.isCancelled else { return }
+
+        let rows = bluetoothVM.characteristics
+        print("[session] calibrating on \(rows.count) rows")
+        freshnessVM.calibrate(withEmptyBox: rows)
+
+        if freshnessVM.needsBaseline {
+            print("[session] no baseline, \(freshnessVM.state)")
+            viewModel.connectionFailed()
+            return
+        }
+
+        print("[session] machine ready")
+        viewModel.machineReady()
+        await readChicken()
+    }
+
+    // "Menyiapkan Mesin": fill the progress bar while the empty box rows come in
+    private func collectBaselineRows() async {
+        while bluetoothVM.characteristics.count < Self.baselineRows, !Task.isCancelled {
+            let count = bluetoothVM.characteristics.count
+            viewModel.preparing(progress: Double(count) / Double(Self.baselineRows))
+            print("[session] preparing: \(count)/\(Self.baselineRows) rows")
+            try? await Task.sleep(for: .seconds(1))
+        }
+    }
+
+    // read whatever is in the box once a second and print what the model says
+    private func readChicken() async {
+        while !Task.isCancelled {
+            try? await Task.sleep(for: .seconds(1))
+
+            freshnessVM.scan(bluetoothVM.characteristics)
+
+            if case .scanned(let freshness) = freshnessVM.state, let rel = freshnessVM.rel {
+                print("[session] rel137 \(rel.rel137) rel135 \(rel.rel135) -> \(freshness.title)")
+            } else {
+                print("[session] \(freshnessVM.state)")
+            }
+        }
     }
 }
 
@@ -41,6 +102,8 @@ struct SessionScreen: View {
         onBack: {},
         onEnd: { _ in }
     )
+    .environment(BluetoothViewModel<Sensor>())
+    .environment(FreshnessViewModel())
 }
 
 #Preview("Ready", traits: .landscapeLeft) {
@@ -49,6 +112,8 @@ struct SessionScreen: View {
         onBack: {},
         onEnd: { _ in }
     )
+    .environment(BluetoothViewModel<Sensor>())
+    .environment(FreshnessViewModel())
 }
 
 #Preview("Scanning", traits: .landscapeLeft) {
@@ -61,6 +126,8 @@ struct SessionScreen: View {
         onBack: {},
         onEnd: { _ in }
     )
+    .environment(BluetoothViewModel<Sensor>())
+    .environment(FreshnessViewModel())
 }
 
 #Preview("Fresh", traits: .landscapeLeft) {
@@ -74,6 +141,8 @@ struct SessionScreen: View {
         onBack: {},
         onEnd: { _ in }
     )
+    .environment(BluetoothViewModel<Sensor>())
+    .environment(FreshnessViewModel())
 }
 
 #Preview("Next Chicken", traits: .landscapeLeft) {
@@ -86,6 +155,8 @@ struct SessionScreen: View {
         onBack: {},
         onEnd: { _ in }
     )
+    .environment(BluetoothViewModel<Sensor>())
+    .environment(FreshnessViewModel())
 }
 
 #Preview("Not Fresh", traits: .landscapeLeft) {
@@ -99,4 +170,6 @@ struct SessionScreen: View {
         onBack: {},
         onEnd: { _ in }
     )
+    .environment(BluetoothViewModel<Sensor>())
+    .environment(FreshnessViewModel())
 }
