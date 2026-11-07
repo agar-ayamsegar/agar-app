@@ -9,8 +9,9 @@ import SwiftUI
 
 
 struct MainScreen: View {
-    @State var pageStateVM: PageStateViewModel = PageStateViewModel(state: .connect)
+    @State var pageStateVM: PageStateViewModel = PageStateViewModel()
     @State var bluetoothVM: BluetoothViewModel<Sensor> = BluetoothViewModel()
+    @State var freshnessVM: FreshnessViewModel = FreshnessViewModel()
     @State var recapVM: RecapViewModel = RecapViewModel()
 
     var body: some View {
@@ -26,6 +27,8 @@ struct MainScreen: View {
                 } onEnd: { finishedSession in
                     pageStateVM.setState(.summary(finishedSession))
                 }
+                .environment(bluetoothVM)
+                .environment(freshnessVM)
             case .summary(let session):
                 SessionSummaryScreen(session: session) {
                     recapVM.add(session)
@@ -36,9 +39,12 @@ struct MainScreen: View {
                     .environment(bluetoothVM)
             }
         }
-        // design is light-only for now
+        // connect as soon as the app opens, the sensors warm up while the operator is still on home
+        .task {
+            await bluetoothVM.connect()
+            print("[main] bluetooth \(bluetoothVM.state)")
+        }
         .preferredColorScheme(.light)
-        // app copy is Indonesian, format dates the same way
         .environment(\.locale, Locale(identifier: "id_ID"))
     }
 }

@@ -11,6 +11,7 @@ import SwiftUI
 enum Freshness: String, Sendable, Hashable, CaseIterable {
     case fresh
     case notFresh
+    case unknown
     
     var title: String {
         switch self {
@@ -18,6 +19,8 @@ enum Freshness: String, Sendable, Hashable, CaseIterable {
             return "Segar"
         case .notFresh:
             return "Tidak Segar"
+        case .unknown:
+            return "Tidak diketahui" // currently if model failed to initiate
         }
     }
     
@@ -27,6 +30,8 @@ enum Freshness: String, Sendable, Hashable, CaseIterable {
             return .freshGreen
         case .notFresh:
             return .notFreshRed
+        case .unknown:
+            return .clear
         }
     }
     
@@ -36,6 +41,8 @@ enum Freshness: String, Sendable, Hashable, CaseIterable {
             return .freshGreenLight
         case .notFresh:
             return .notFreshRedLight
+        case .unknown:
+            return .clear
         }
     }
     
@@ -45,12 +52,14 @@ enum Freshness: String, Sendable, Hashable, CaseIterable {
             return .fresh
         case .notFresh:
             return .notFresh
+        case .unknown:
+            return .preparing
         }
     }
     
     var instruction: String? {
         switch self {
-        case .fresh:
+        case .fresh, .unknown:
             return nil
         case .notFresh:
             return "Pisahkan Ayam ini !"
