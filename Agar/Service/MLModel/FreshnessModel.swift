@@ -19,13 +19,9 @@ struct FreshnessModel {
         case baselineContaminated
     }
 
-    private let vref: Float = 5.0
-    private let vcc: Float = 5.0
-    private let rl137: Float = 1.0
-    private let rl135: Float = 2.0
-
+    // the esp32 adc is 12 bit; an uno sketch sends 0-1023, so retune this if the board changes
+    static let adcMax: Float = 4095
     static let rowsPerWindow = 40
-
     let model: Model
 
     private(set) var air: (rs137: Float, rs135: Float)?
@@ -49,11 +45,6 @@ struct FreshnessModel {
         
     }
 
-    private func resistance(raw: Float, rl: Float) -> Float {
-        let volts = max(raw * vref / 1023, 0.01)
-        return rl * (vcc - volts) / volts
-    }
-
     private func median(_ values: [Float]) -> Float {
         let sorted = values.sorted()
         let middle = sorted.count / 2
@@ -68,8 +59,12 @@ struct FreshnessModel {
         let flat = readings.dropLast(7).suffix(Self.rowsPerWindow)
         guard flat.count >= 5 else { throw Problem.tooFewReadings }
 
-        air = (median(flat.map { resistance(raw: $0.mq137, rl: rl137) }),
-               median(flat.map { resistance(raw: $0.mq135, rl: rl135) }))
+        // rs comes off the wire in kOhm, the firmware already undid the divider and the adc scale
+        let rs137 = median(flat.map(\.rs137))
+        let rs135 = median(flat.map(\.rs135))
+        guard rs137 > 0, rs135 > 0 else { throw Problem.sensorSaturated }
+
+        air = (rs137, rs135)
     }
 
     func rel(for readings: [Sensor]) throws -> (rel137: Float, rel135: Float) {
@@ -77,12 +72,13 @@ struct FreshnessModel {
 
         let window = readings.suffix(Self.rowsPerWindow)
         guard window.count >= 5 else { throw Problem.tooFewReadings }
-        guard window.allSatisfy({ $0.mq137 < 1023 && $0.mq135 < 1023 }) else {
+        // raw counts are only kept for this: a railed adc reads a floor, not a smell
+        guard window.allSatisfy({ $0.mq137 < Self.adcMax && $0.mq135 < Self.adcMax }) else {
             throw Problem.sensorSaturated
         }
 
-        let rel137 = median(window.map { resistance(raw: $0.mq137, rl: rl137) }) / air.rs137
-        let rel135 = median(window.map { resistance(raw: $0.mq135, rl: rl135) }) / air.rs135
+        let rel137 = median(window.map(\.rs137)) / air.rs137
+        let rel135 = median(window.map(\.rs135)) / air.rs135
 
         guard rel137 < 1.10, rel135 < 1.10 else { throw Problem.baselineContaminated }
 
