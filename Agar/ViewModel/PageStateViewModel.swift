@@ -13,7 +13,6 @@ enum PageState {
     case home
     case session(ScanSession)
     case summary(ScanSession)
-    case connect
 }
 
 @Observable

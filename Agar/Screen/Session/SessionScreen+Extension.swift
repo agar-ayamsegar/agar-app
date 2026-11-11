@@ -11,18 +11,17 @@ import SwiftUI
 extension SessionScreen {
     private static let instructions = [
         "Sambungkan Dengan Bluetooth",
-        "Jangan Masukkan Ayam Dulu",
-        "Biarkan mesin kondisi tertutup",
+        "Jangan tusuk ayam terlebih dahulu"
     ]
 
     var machinePanel: some View {
         DetailPanel {
             Group {
-                switch viewModel.machineState {
+                switch sessionVM.machineState {
                 case .preparing(let progress):
                     preparing(progress: progress)
                 case .connectionFailed:
-                    preparing(progress: 0)
+                    connectionFailed
                 case .ready:
                     ready
                 case .scanning(let chickenNumber, let progress):
@@ -41,7 +40,7 @@ extension SessionScreen {
     }
 
     var panelBackground: Color {
-        switch viewModel.machineState {
+        switch sessionVM.machineState {
         case .result(let record):
             return record.freshness.tint
         case .preparing, .connectionFailed, .ready, .scanning, .nextChicken:
@@ -76,29 +75,54 @@ extension SessionScreen {
             }
             .frame(maxWidth: 420)
 
-            VStack(spacing: 8) {
-                ForEach(Self.instructions, id: \.self) { instruction in
-                    Text(instruction)
-                }
-            }
-            .font(.subheadline)
+            instructionList
 
-            HStack(spacing: 12) {
-                Button("Coba Lagi", action: viewModel.retry)
-                    .disabled(!viewModel.canRetry)
-
-                Button("Kembali", action: onBack)
-            }
-            .buttonStyle(.borderedProminent)
-            .buttonBorderShape(.capsule)
-            .tint(.actionBlue)
+            machineActions
         }
+    }
+
+    // pairing was rejected, or the machine never sent a row
+    var connectionFailed: some View {
+        VStack(spacing: 16) {
+            headline(title: "Gagal Menyiapkan Mesin")
+
+            ChickenIllustration(pose: .preparing, height: 280)
+
+            instructionList
+
+            machineActions
+        }
+    }
+
+    var instructionList: some View {
+        VStack(spacing: 8) {
+            ForEach(Self.instructions, id: \.self) { instruction in
+                Text(instruction)
+            }
+        }
+        .font(.subheadline)
+    }
+
+    // "Coba Lagi" only bites once the machine has actually failed
+    var machineActions: some View {
+        HStack(spacing: 12) {
+            Button("Coba Lagi") {
+                Task { await bluetoothVM.connect() }
+            }
+            .disabled(!sessionVM.canRetry)
+
+            Button("Kembali") {
+                pageStateVM.setState(.home)
+            }
+        }
+        .buttonStyle(.borderedProminent)
+        .buttonBorderShape(.capsule)
+        .tint(.actionBlue)
     }
 
     var ready: some View {
         VStack(spacing: 8) {
-            headline(caption: "Mesin Siap Digunakan", title: "Masukkan Ayam")
-
+            headline(caption: "Alat Siap Digunakan", title: "Periksa Ayam")
             ChickenIllustration(pose: .ready, height: 420)
         }
     
@@ -107,7 +131,7 @@ extension SessionScreen {
     // same look as ready, different text
     var nextChicken: some View {
         VStack(spacing: 8) {
-            headline(caption: "Masukkan", title: "Ayam Selanjutnya")
+            headline(caption: "Tancapkan", title: "Ayam Selanjutnya")
 
             ChickenIllustration(pose: .ready, height: 420)
         }
@@ -153,7 +177,7 @@ extension SessionScreen {
             history
 
             Button {
-                onEnd(viewModel.endSession())
+                pageStateVM.setState(.summary(sessionVM.endSession()))
             } label: {
                 Text("Akhiri Sesi")
                     .frame(maxWidth: .infinity)
@@ -162,22 +186,22 @@ extension SessionScreen {
             .buttonBorderShape(.capsule)
             .controlSize(.large)
             .tint(.actionBlue)
-            .disabled(!viewModel.canEndSession)
+            .disabled(!sessionVM.canEndSession)
         }
     }
 
     var header: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Sesi Scan Ayam #\(viewModel.session.number)")
+            Text("Sesi Scan Ayam #\(sessionVM.session.number)")
                 .font(.caption)
                 .bold()
                 .foregroundStyle(.secondary)
 
-            Text(viewModel.session.startedAt, format: .dateTime.day().month(.wide).year())
+            Text(sessionVM.session.startedAt, format: .dateTime.day().month(.wide).year())
                 .font(.title3)
                 .bold()
 
-            Text("Sesi Mulai : \(viewModel.session.startedAt, format: .dateTime.hour().minute())")
+            Text("Sesi Mulai : \(sessionVM.session.startedAt, format: .dateTime.hour().minute())")
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .padding(.top, 4)
@@ -187,14 +211,14 @@ extension SessionScreen {
 
     var stats: some View {
         VStack(spacing: 8) {
-            StatCard(title: "Ayam Masuk", value: Text("\(viewModel.session.totalCount)"), valueSize: 44)
+            StatCard(title: "Ayam Masuk", value: Text("\(sessionVM.session.totalCount)"), valueSize: 44)
 
             HStack(spacing: 8) {
-                StatCard(freshness: .fresh, value: viewModel.session.freshCount)
-                StatCard(freshness: .notFresh, value: viewModel.session.notFreshCount)
+                StatCard(freshness: .fresh, value: sessionVM.session.freshCount)
+                StatCard(freshness: .notFresh, value: sessionVM.session.notFreshCount)
             }
         }
-        .animation(.default, value: viewModel.session.totalCount)
+        .animation(.default, value: sessionVM.session.totalCount)
     }
 
     var history: some View {
@@ -205,7 +229,7 @@ extension SessionScreen {
 
             ScrollView {
                 LazyVStack(spacing: 0) {
-                    ForEach(viewModel.session.records) { record in
+                    ForEach(sessionVM.session.records) { record in
                         Divider()
                         historyRow(record)
                     }

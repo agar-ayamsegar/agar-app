@@ -10,7 +10,7 @@ import SwiftUI
 
 struct MainScreen: View {
     @State var pageStateVM: PageStateViewModel = PageStateViewModel()
-    @State var bluetoothVM: BluetoothViewModel<Sensor> = BluetoothViewModel()
+    @State var bluetoothVM: BluetoothViewModel<ElectrodeSensor> = BluetoothViewModel()
     @State var freshnessVM: FreshnessViewModel = FreshnessViewModel()
     @State var recapVM: RecapViewModel = RecapViewModel()
 
@@ -22,27 +22,16 @@ struct MainScreen: View {
                     pageStateVM.setState(.session(recapVM.makeSession()))
                 }
             case .session(let session):
-                SessionScreen(viewModel: SessionViewModel(session: session)) {
-                    pageStateVM.setState(.home)
-                } onEnd: { finishedSession in
-                    pageStateVM.setState(.summary(finishedSession))
-                }
+                SessionScreen(session: session)
                 .environment(bluetoothVM)
                 .environment(freshnessVM)
+                .environment(pageStateVM)
             case .summary(let session):
                 SessionSummaryScreen(session: session) {
                     recapVM.add(session)
                     pageStateVM.setState(.home)
                 }
-            case .connect:
-                ConnectScreen()
-                    .environment(bluetoothVM)
             }
-        }
-        // connect as soon as the app opens, the sensors warm up while the operator is still on home
-        .task {
-            await bluetoothVM.connect()
-            print("[main] bluetooth \(bluetoothVM.state)")
         }
         .preferredColorScheme(.light)
         .environment(\.locale, Locale(identifier: "id_ID"))
