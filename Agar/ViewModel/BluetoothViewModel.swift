@@ -8,7 +8,7 @@
 import SwiftUI
 
 
-enum BluetoothState {
+enum BluetoothState: Equatable {
     case idle,
          scanning,
          connected,
@@ -33,6 +33,9 @@ class BluetoothViewModel<T: Decodable> {
     // MARK: - state variable
     private(set) var state: BluetoothState = .idle
     private(set) var characteristics: [T] = []
+
+    // the pairing passkey is typed by hand, give the operator room
+    private let pairingTimeout = 30
     
     init(bluetoothManager: IBluetoothManager = BluetoothManager()) {
         self.bluetoothManager = bluetoothManager
@@ -41,14 +44,29 @@ class BluetoothViewModel<T: Decodable> {
     
     // connecting to service and running the subscribe message
     func connect() async {
+        state = .scanning
         do {
             try await bluetoothManager?.connect()
             try await bluetoothManager?.readCharacteristics(onData: readData)
+            try await waitForFirstReading()
+            state = .connected
         } catch {
             state = .error(error.localizedDescription)
         }
     }
         
+    // the pairing popup lands after the subscribe, so the machine is only really on
+    // the line once it sends a row we can decode
+    // ponytail: 1s poll, swap for a continuation if the first row has to land faster
+    private func waitForFirstReading() async throws {
+        for _ in 0..<pairingTimeout {
+            if !characteristics.isEmpty { return }
+            if bluetoothManager?.isConnected == false { throw BluetoothError.machineNotFound }
+            try await Task.sleep(for: .seconds(1))
+        }
+        throw BluetoothError.noData
+    }
+
     func readData(characteristic: String) {
         guard characteristic != "" else { return }
         
@@ -57,7 +75,7 @@ class BluetoothViewModel<T: Decodable> {
             guard let sensor = sensor else { return }
             characteristics.append(sensor)
         } catch {
-            state = .error(error.localizedDescription)
+            print("[ble] bad packet: \(error.localizedDescription)")
         }
     }
     func clear(){
