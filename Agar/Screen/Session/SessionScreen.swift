@@ -8,17 +8,16 @@
 import SwiftUI
 
 struct SessionScreen: View {
-    private static let baselineRows = FreshnessModel.rowsPerWindow + 7
-    @Environment(BluetoothViewModel<Sensor>.self) var bluetoothVM
-    @State var viewModel: SessionViewModel
+    @Environment(BluetoothViewModel<ElectrodeSensor>.self) var bluetoothVM
     @Environment(FreshnessViewModel.self) var freshnessVM
-    var onBack: () -> Void
-    var onEnd: (ScanSession) -> Void
+    @Environment(PageStateViewModel.self) var pageStateVM
 
-    init(viewModel: SessionViewModel, onBack: @escaping () -> Void, onEnd: @escaping (ScanSession) -> Void) {
-        _viewModel = State(initialValue: viewModel)
-        self.onBack = onBack
-        self.onEnd = onEnd
+    @State var sessionVM: SessionViewModel
+    var session: ScanSession
+    
+    init(session: ScanSession) {
+        self.session = session
+        self._sessionVM = State(initialValue: SessionViewModel(session: session))
     }
 
     var body: some View {
@@ -34,85 +33,38 @@ struct SessionScreen: View {
                 .toolbar(.hidden, for: .navigationBar)
         }
         .navigationSplitViewStyle(.balanced)
-        .task(id: viewModel.attempt) {
-            await prepareMachine()
+        .onChange(of: bluetoothVM.state, initial: true) { _, state in
+            sessionVM.connection(state)
         }
-    }
+        .onChange(of: bluetoothVM.characteristics.count) {
+            guard let row = bluetoothVM.characteristics.last else { return }
+            print("[row] ohm \(row.ohm) chicken \(row.chicken)")
 
-    // the operator says the box is empty by getting here, so the baseline is taken from now on
-        private func prepareMachine() async {
-        // the baseline is kept for as long as the app runs, restart the iPad to take a new one
-        guard freshnessVM.needsBaseline else {
-            print("[session] baseline already taken")
-            viewModel.machineReady()
-            await readChicken()
-            return
-        }
+            guard sessionVM.collect(row) else { return }
+            freshnessVM.scan(sessionVM.stabRows)
 
-        // rows from before this screen could be anything, the empty box starts counting now
-        bluetoothVM.clear()
-        await collectBaselineRows()
-        guard !Task.isCancelled else { return }
-
-        let rows = bluetoothVM.characteristics
-        print("[session] calibrating on \(rows.count) rows")
-        freshnessVM.calibrate(withEmptyBox: rows)
-
-        if freshnessVM.needsBaseline {
-            print("[session] no baseline, \(freshnessVM.state)")
-            viewModel.connectionFailed()
-            return
-        }
-
-        print("[session] machine ready")
-        viewModel.machineReady()
-        await readChicken()
-    }
-
-    // "Menyiapkan Mesin": fill the progress bar while the empty box rows come in
-    private func collectBaselineRows() async {
-        while bluetoothVM.characteristics.count < Self.baselineRows, !Task.isCancelled {
-            let count = bluetoothVM.characteristics.count
-            viewModel.preparing(progress: Double(count) / Double(Self.baselineRows))
-            print("[session] preparing: \(count)/\(Self.baselineRows) rows")
-            try? await Task.sleep(for: .seconds(1))
-        }
-    }
-
-    // read whatever is in the box once a second and print what the model says
-    private func readChicken() async {
-        while !Task.isCancelled {
-            try? await Task.sleep(for: .seconds(1))
-
-            freshnessVM.scan(bluetoothVM.characteristics)
-
-            if case .scanned(let freshness) = freshnessVM.state, let rel = freshnessVM.rel {
-                print("[session] rel137 \(rel.rel137) rel135 \(rel.rel135) -> \(freshness.title)")
-            } else {
-                print("[session] \(freshnessVM.state)")
+            if case .scanned(let freshness) = freshnessVM.state {
+                sessionVM.record(freshness)
             }
+        }
+        .task {
+            // already paired from an earlier session, nothing to prepare
+            guard bluetoothVM.state != .connected else { return }
+            await bluetoothVM.connect()
         }
     }
 }
 
 
 #Preview("Preparing", traits: .landscapeLeft) {
-    SessionScreen(
-        viewModel: SessionViewModel(session: ScanSession(number: 137), machineState: .preparing(progress: 0.85)),
-        onBack: {},
-        onEnd: { _ in }
-    )
-    .environment(BluetoothViewModel<Sensor>())
+    SessionScreen(session: ScanSession(number: 1))
+    .environment(BluetoothViewModel<ElectrodeSensor>())
     .environment(FreshnessViewModel())
 }
 
 #Preview("Ready", traits: .landscapeLeft) {
-    SessionScreen(
-        viewModel: SessionViewModel(session: ScanSession(number: 137), machineState: .ready),
-        onBack: {},
-        onEnd: { _ in }
-    )
-    .environment(BluetoothViewModel<Sensor>())
+    SessionScreen(session: ScanSession(number: 1))
+    .environment(BluetoothViewModel<ElectrodeSensor>())
     .environment(FreshnessViewModel())
 }
 
@@ -120,13 +72,8 @@ struct SessionScreen: View {
     let session = ScanSession(number: 137, records: (1...65).map {
         ScanRecord(chickenNumber: $0, freshness: $0.isMultiple(of: 30) ? .notFresh : .fresh)
     })
-
-    SessionScreen(
-        viewModel: SessionViewModel(session: session, machineState: .scanning(chickenNumber: 66, progress: 0.4)),
-        onBack: {},
-        onEnd: { _ in }
-    )
-    .environment(BluetoothViewModel<Sensor>())
+    SessionScreen(session: session)
+    .environment(BluetoothViewModel<ElectrodeSensor>())
     .environment(FreshnessViewModel())
 }
 
@@ -136,12 +83,8 @@ struct SessionScreen: View {
     })
     let result = ScanRecord(chickenNumber: 61, freshness: .fresh)
 
-    SessionScreen(
-        viewModel: SessionViewModel(session: session, machineState: .result(result)),
-        onBack: {},
-        onEnd: { _ in }
-    )
-    .environment(BluetoothViewModel<Sensor>())
+    SessionScreen(session: session)
+    .environment(BluetoothViewModel<ElectrodeSensor>())
     .environment(FreshnessViewModel())
 }
 
@@ -150,12 +93,8 @@ struct SessionScreen: View {
         ScanRecord(chickenNumber: $0, freshness: $0.isMultiple(of: 30) ? .notFresh : .fresh)
     })
 
-    SessionScreen(
-        viewModel: SessionViewModel(session: session, machineState: .nextChicken),
-        onBack: {},
-        onEnd: { _ in }
-    )
-    .environment(BluetoothViewModel<Sensor>())
+    SessionScreen(session: session)
+    .environment(BluetoothViewModel<ElectrodeSensor>())
     .environment(FreshnessViewModel())
 }
 
@@ -165,11 +104,7 @@ struct SessionScreen: View {
     })
     let result = ScanRecord(chickenNumber: 61, freshness: .notFresh)
 
-    SessionScreen(
-        viewModel: SessionViewModel(session: session, machineState: .result(result)),
-        onBack: {},
-        onEnd: { _ in }
-    )
-    .environment(BluetoothViewModel<Sensor>())
+    SessionScreen(session: session)
+    .environment(BluetoothViewModel<ElectrodeSensor>())
     .environment(FreshnessViewModel())
 }

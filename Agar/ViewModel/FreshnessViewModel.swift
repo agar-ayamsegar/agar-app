@@ -9,91 +9,52 @@ import SwiftUI
 
 enum FreshnessState {
     case idle,
-         calibrated,
          scanned(Freshness),
          error(String)
 }
 
 @Observable
 class FreshnessViewModel {
-    // MARK: - freshness model coming from services
-    private var model: FreshnessModel?
+    // nothing is thrown away, every row of the stab counts
+    static let settleSeconds = 0
+    // one row per second, so a 5 second stab
+    static let sampleCount = 5
+    // ponytail: random stab line, recalibrate against fresh meat before shipping
+    static let freshOhm: Float = 942
 
-    // MARK: - state variable
+    // how many rows a scan needs before it can decide
+    static var rowsPerScan: Int { settleSeconds + sampleCount }
+
+    // MARK: - state
     private(set) var state: FreshnessState = .idle
-    private(set) var rel: (rel137: Float, rel135: Float)?
+    private(set) var ohm: Float?
 
-    // the empty box must be read before any chicken can be scanned
-    var needsBaseline: Bool {
-        model?.air == nil
-    }
+    // the median ignores a reading that jumps when a pin moves, the average would not,
+    // and the thresholds were calculated on the median
+    func scan(_ readings: [ElectrodeSensor]) {
+        let window = readings.dropFirst(Self.settleSeconds).prefix(Self.sampleCount)
 
-    init() {
-        loadModel()
-    }
-
-    // baseline from the empty box, every scan is measured against this
-    func calibrate(withEmptyBox readings: [Sensor]) {
-        // calibrate is mutating, so it has to run on the property itself
-        guard model != nil else { return }
-
-        do {
-            try model?.calibrate(withEmptyBox: readings)
-            state = .calibrated
-        } catch {
-            state = .error(message(for: error))
-        }
-    }
-
-    // ble rows -> rel -> mlx
-    func scan(_ readings: [Sensor]) {
-        guard let model = model else { return }
-
-        do {
-            let rel = try model.rel(for: readings)
-            self.rel = rel
-            state = .scanned(model.process(rel137: rel.rel137, rel135: rel.rel135))
-        } catch {
-            rel = nil
-            state = .error(message(for: error))
-        }
-    }
-
-    // the baseline lives inside the model, so dropping it means loading the model again
-    func reset() {
-        model = nil
-        rel = nil
-        state = .idle
-        loadModel()
-    }
-
-    private func loadModel() {
-        guard let url = Bundle.main.url(forResource: "freshness_model", withExtension: "json") else {
-            state = .error("freshness_model.json tidak ada di bundle.")
+        guard window.count == Self.sampleCount else {
+            state = .error("Data belum cukup")
             return
         }
 
-        do {
-            model = try FreshnessModel(modelFileAt: url)
-        } catch {
-            state = .error("Gagal memuat model: \(error)")
-        }
+        let ohm = Self.median(window.map(\.ohm))
+        let freshness: Freshness = ohm >= Self.freshOhm ? .fresh : .notFresh
+        self.ohm = ohm
+        state = .scanned(freshness)
+        print("[scan] median \(ohm) ohm -> \(freshness)")
     }
 
-    private func message(for error: Error) -> String {
-        guard let problem = error as? FreshnessModel.Problem else {
-            return "\(error)"
-        }
+    static func median(_ values: [Float]) -> Float {
+        let sorted = values.sorted()
+        let mid = sorted.count / 2
+        // an even count has no middle value, take the two it sits between
+        return sorted.count.isMultiple(of: 2) ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid]
+    }
 
-        switch problem {
-        case .notCalibrated:
-            return "Ambil baseline kotak kosong dulu."
-        case .tooFewReadings:
-            return "Data kurang. Butuh minimal \(FreshnessModel.rowsPerWindow) baris."
-        case .sensorSaturated:
-            return "Sensor mentok di \(Int(FreshnessModel.adcMax)). Cek kabel GND."
-        case .baselineContaminated:
-            return "Ayam terbaca lebih bersih dari kotak kosong. Baseline diambil saat kotak masih bau."
-        }
+    func reset() {
+        ohm = nil
+        state = .idle
     }
 }
