@@ -141,7 +141,7 @@ extension SessionScreen {
         VStack(spacing: 16) {
             headline(caption: "Ayam #\(chickenNumber)", title: "Sedang Memindai")
 
-            ChickenIllustration(pose: .scanning, height: 300)
+            ChickenIllustration(pose: .scanning, height: 420)
 
             ProgressView(value: progress)
                 .tint(.blue)
