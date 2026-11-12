@@ -7,22 +7,31 @@
 
 import SwiftUI
 import UIKit
-
+import Lottie
 
 struct ChickenIllustration: View {
     var pose: ChickenPose
     var height: CGFloat = 280
+    
+    private func loadinganimation() async -> LottieAnimationSource? {
+        let name = pose.rawValue
+        
+        do {
+            return try await DotLottieFile.named(name).animationSource
+        } catch {
+            print("Lottie gagal load \(name):", error)
+            return LottieAnimation.named(name)?.animationSource
+        }
+    }
 
     var body: some View {
         Group {
-            // fallback to placeholder until the asset is added
-            if UIImage(named: pose.rawValue) != nil {
-                Image(pose.rawValue)
-                    .resizable()
-                    .scaledToFit()
-            } else {
+            LottieView {
+                await loadinganimation()
+            } placeholder: {
                 placeholder
             }
+            .playing(loopMode: .loop)
         }
         .frame(height: height)
         .accessibilityHidden(true)
@@ -44,6 +53,7 @@ struct ChickenIllustration: View {
             .foregroundStyle(.secondary)
     }
 }
+
 
 
 #Preview {
