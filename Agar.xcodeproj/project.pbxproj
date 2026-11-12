@@ -15,6 +15,7 @@
 		FD2FA0A63099E17E003AE4FE /* MLXNN in Frameworks */ = {isa = PBXBuildFile; productRef = FD2FA0A53099E17E003AE4FE /* MLXNN */; };
 		FD2FA0A83099E17E003AE4FE /* MLXOptimizers in Frameworks */ = {isa = PBXBuildFile; productRef = FD2FA0A73099E17E003AE4FE /* MLXOptimizers */; };
 		FD2FA0AA3099E17E003AE4FE /* MLXRandom in Frameworks */ = {isa = PBXBuildFile; productRef = FD2FA0A93099E17E003AE4FE /* MLXRandom */; };
+		FD2FA2E430A579D3003AE4FE /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = FD2FA2E330A579D3003AE4FE /* Lottie */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -33,6 +34,17 @@
 			remoteInfo = Agar;
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		FD2FA2E830A579D3003AE4FE /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			dstPath = "";
+			dstSubfolder = Frameworks;
+			files = (
+			);
+			name = "Embed Frameworks";
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		C8381981308CED85005A3D92 /* Agar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Agar.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -77,6 +89,7 @@
 			files = (
 				FD2FA0A63099E17E003AE4FE /* MLXNN in Frameworks */,
 				FD2FA0A43099E17E003AE4FE /* MLXLinalg in Frameworks */,
+				FD2FA2E430A579D3003AE4FE /* Lottie in Frameworks */,
 				FD2FA0A03099E17E003AE4FE /* MLXFast in Frameworks */,
 				FD2FA0AA3099E17E003AE4FE /* MLXRandom in Frameworks */,
 				FD2FA09E3099E17E003AE4FE /* MLX in Frameworks */,
@@ -136,6 +149,7 @@
 				C838197D308CED85005A3D92 /* Sources */,
 				C838197E308CED85005A3D92 /* Frameworks */,
 				C838197F308CED85005A3D92 /* Resources */,
+				FD2FA2E830A579D3003AE4FE /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -152,6 +166,7 @@
 				FD2FA0A53099E17E003AE4FE /* MLXNN */,
 				FD2FA0A73099E17E003AE4FE /* MLXOptimizers */,
 				FD2FA0A93099E17E003AE4FE /* MLXRandom */,
+				FD2FA2E330A579D3003AE4FE /* Lottie */,
 			);
 			productName = Agar;
 			productReference = C8381981308CED85005A3D92 /* Agar.app */;
@@ -234,6 +249,7 @@
 			packageReferences = (
 				C86F21E93091D2D1000ABBEE /* XCRemoteSwiftPackageReference "AsyncBluetooth" */,
 				FD777B253092005F00ACB317 /* XCRemoteSwiftPackageReference "mlx-swift" */,
+				FD2FA2E230A579C7003AE4FE /* XCRemoteSwiftPackageReference "lottie-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C8381982308CED85005A3D92 /* Products */;
@@ -630,6 +646,14 @@
 				minimumVersion = 6.2.2;
 			};
 		};
+		FD2FA2E230A579C7003AE4FE /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.6.1;
+			};
+		};
 		FD777B253092005F00ACB317 /* XCRemoteSwiftPackageReference "mlx-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/ml-explore/mlx-swift.git";
@@ -680,6 +704,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = FD777B253092005F00ACB317 /* XCRemoteSwiftPackageReference "mlx-swift" */;
 			productName = MLXRandom;
+		};
+		FD2FA2E330A579D3003AE4FE /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FD2FA2E230A579C7003AE4FE /* XCRemoteSwiftPackageReference "lottie-ios" */;
+			productName = Lottie;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
