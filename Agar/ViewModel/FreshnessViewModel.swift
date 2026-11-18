@@ -20,7 +20,8 @@ class FreshnessViewModel {
     // one row per second, so a 5 second stab
     static let sampleCount = 5
     // ponytail: random stab line, recalibrate against fresh meat before shipping
-    static let freshOhm: Float = 942
+    static let freshOhmUpper: Float = 400
+    static let freshOhmLower: Float = 296
 
     // how many rows a scan needs before it can decide
     static var rowsPerScan: Int { settleSeconds + sampleCount }
@@ -40,7 +41,7 @@ class FreshnessViewModel {
         }
 
         let ohm = Self.median(window.map(\.ohm))
-        let freshness: Freshness = ohm >= Self.freshOhm ? .fresh : .notFresh
+        let freshness: Freshness = ohm >= Self.freshOhmUpper && ohm <= Self.freshOhmLower ? .fresh : .notFresh
         self.ohm = ohm
         state = .scanned(freshness)
         print("[scan] median \(ohm) ohm -> \(freshness)")

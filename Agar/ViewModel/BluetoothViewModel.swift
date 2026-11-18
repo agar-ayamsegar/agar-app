@@ -70,6 +70,8 @@ class BluetoothViewModel<T: Decodable> {
     func readData(characteristic: String) {
         guard characteristic != "" else { return }
         
+        print("characteristic: \(characteristic)")
+        
         do {
             let sensor = try getJson(value: characteristic)
             guard let sensor = sensor else { return }
