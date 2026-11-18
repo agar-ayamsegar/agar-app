@@ -15,26 +15,30 @@ struct MainScreen: View {
     @State var recapVM: RecapViewModel = RecapViewModel()
 
     var body: some View {
-        VStack {
-            switch pageStateVM.state {
-            case .home:
-                HomeScreen(viewModel: recapVM) {
-                    pageStateVM.setState(.session(recapVM.makeSession()))
-                }
-            case .session(let session):
-                SessionScreen(session: session)
-                .environment(bluetoothVM)
-                .environment(freshnessVM)
-                .environment(pageStateVM)
-            case .summary(let session):
-                SessionSummaryScreen(session: session) {
-                    recapVM.add(session)
-                    pageStateVM.setState(.home)
+        NavigationStack{
+            VStack {
+                switch pageStateVM.state {
+                case .home:
+                    HomeScreen(viewModel: recapVM) {
+                        pageStateVM.setState(.session(recapVM.makeSession()))
+                    }
+                case .session(let session):
+                    SessionScreen(session: session)
+                        .environment(bluetoothVM)
+                        .environment(freshnessVM)
+                        .environment(pageStateVM)
+                        .environment(recapVM)
+                case .summary(let session):
+                    SessionSummaryScreen(session: session) {
+                        recapVM.add(session)
+                        pageStateVM.setState(.home)
+                    }
                 }
             }
+            .preferredColorScheme(.light)
+            .environment(\.locale, Locale(identifier: "id_ID"))
+            .containerBackground(.surfaceCream, for: .navigation)
         }
-        .preferredColorScheme(.light)
-        .environment(\.locale, Locale(identifier: "id_ID"))
     }
 }
 

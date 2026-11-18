@@ -15,28 +15,27 @@ extension SessionScreen {
     ]
 
     var machinePanel: some View {
-        DetailPanel {
-            Group {
-                switch sessionVM.machineState {
-                case .preparing(let progress):
-                    preparing(progress: progress)
-                case .connectionFailed:
-                    connectionFailed
-                case .ready:
-                    ready
-                case .scanning(let chickenNumber, let progress):
-                    scanning(chickenNumber: chickenNumber, progress: progress)
-                case .result(let record):
-                    result(record)
-                case .nextChicken:
-                    nextChicken
-                }
+        Group {
+            switch sessionVM.machineState {
+            case .preparing(let progress):
+                preparing(progress: progress)
+            case .connectionFailed:
+                connectionFailed
+            case .ready:
+                ready
+            case .scanning(let chickenNumber, let progress):
+                scanning(chickenNumber: chickenNumber, progress: progress)
+            case .result(let record):
+                result(record)
+            case .nextChicken:
+                nextChicken
             }
-            .padding(32)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(panelBackground, in: .rect(cornerRadius: 24))
-            .animation(.easeInOut, value: panelBackground)
         }
+        .padding(32)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(panelBackground, in: .rect(cornerRadius: 24))
+        .animation(.easeInOut, value: panelBackground)
+        .padding(20)
     }
 
     var panelBackground: Color {
@@ -56,10 +55,10 @@ extension SessionScreen {
             }
 
             Text(title)
-                .font(.system(size: 72, weight: .bold))
+                .font(.system(size: 40, weight: .bold))
                 .multilineTextAlignment(.center)
                 .minimumScaleFactor(0.6)
-                .lineLimit(1)
+                .lineLimit(2)
         }
     }
 
@@ -81,7 +80,6 @@ extension SessionScreen {
         }
     }
 
-    // pairing was rejected, or the machine never sent a row
     var connectionFailed: some View {
         VStack(spacing: 16) {
             headline(title: "Gagal Menyiapkan Mesin")
@@ -103,7 +101,6 @@ extension SessionScreen {
         .font(.subheadline)
     }
 
-    // "Coba Lagi" only bites once the machine has actually failed
     var machineActions: some View {
         HStack(spacing: 12) {
             Button("Coba Lagi") {
@@ -122,26 +119,25 @@ extension SessionScreen {
 
     var ready: some View {
         VStack(spacing: 8) {
-            headline(caption: "Alat Siap Digunakan", title: "Periksa Ayam")
-            ChickenIllustration(pose: .ready, height: 420)
+            headline(title: "Mesin Siap Digunakan")
+            ChickenIllustration(pose: .ready, height: 300)
         }
     
     }
 
-    // same look as ready, different text
     var nextChicken: some View {
         VStack(spacing: 8) {
             headline(caption: "Tancapkan", title: "Ayam Selanjutnya")
 
-            ChickenIllustration(pose: .ready, height: 420)
+            ChickenIllustration(pose: .ready, height: 300)
         }
     }
 
     func scanning(chickenNumber: Int, progress: Double) -> some View {
         VStack(spacing: 16) {
-            headline(caption: "Ayam #\(chickenNumber)", title: "Sedang Memindai")
+            headline(caption: "Ayam #\(chickenNumber)", title: "Sedang Menganalisa")
 
-            ChickenIllustration(pose: .scanning, height: 420)
+            ChickenIllustration(pose: .scanning, height: 300)
 
             ProgressView(value: progress)
                 .tint(.blue)
@@ -166,50 +162,22 @@ extension SessionScreen {
         }
         .foregroundStyle(.white)
     }
-
-    // header, stats, riwayat scan, end button
-    var sidebar: some View {
-        VStack(spacing: 16) {
-            header
-
-            stats
-
-            history
-
-            Button {
-                pageStateVM.setState(.summary(sessionVM.endSession()))
-            } label: {
-                Text("Akhiri Sesi")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.borderedProminent)
-            .buttonBorderShape(.capsule)
-            .controlSize(.large)
-            .tint(.actionBlue)
-            .disabled(!sessionVM.canEndSession)
-        }
-    }
-
-    var header: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("Sesi Scan Ayam #\(sessionVM.session.number)")
-                .font(.caption)
-                .bold()
-                .foregroundStyle(.secondary)
-
+    
+    
+    
+    var sessionHeader: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text("Sesi Pemeriksaan #\(String(format: "%03d", sessionVM.session.number))")
+                .font(.headline)
             Text(sessionVM.session.startedAt, format: .dateTime.day().month(.wide).year())
-                .font(.title3)
-                .bold()
-
-            Text("Sesi Mulai : \(sessionVM.session.startedAt, format: .dateTime.hour().minute())")
                 .font(.caption)
                 .foregroundStyle(.secondary)
-                .padding(.top, 4)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .fixedSize(horizontal: true, vertical: false)
     }
 
     var stats: some View {
+        
         VStack(spacing: 8) {
             StatCard(title: "Ayam Masuk", value: Text("\(sessionVM.session.totalCount)"), valueSize: 44)
 
@@ -242,19 +210,21 @@ extension SessionScreen {
         .background(Color.cardGray, in: .rect(cornerRadius: 16))
     }
 
+    // three equal columns, so the rows line up under Waktu / Ayam / Kondisi
     func historyRow(_ record: ScanRecord) -> some View {
         HStack(spacing: 16) {
             Text(record.scannedAt, format: .dateTime.hour().minute().second())
-                .frame(width: 80, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
             Text("#\(record.chickenNumber)")
-                .frame(width: 48, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
             Text(record.freshness.title)
                 .foregroundStyle(record.freshness.tint)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .font(.subheadline)
-        .padding(.vertical, 8)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
     }
 }

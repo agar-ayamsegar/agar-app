@@ -17,8 +17,8 @@ struct DetailPanel<Content: View>: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding(padding)
             .background {
-                UnevenRoundedRectangle(topLeadingRadius: 48, bottomLeadingRadius: 48)
-                    .fill(Color(.cardGray))
+                RoundedRectangle(cornerRadius: 24)
+                    .fill(Color(.white))
                     .ignoresSafeArea()
             }
             
