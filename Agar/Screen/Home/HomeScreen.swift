@@ -11,6 +11,7 @@ import SwiftUI
 struct HomeScreen: View {
     @Bindable var viewModel: RecapViewModel
     var onStartScan: () -> Void
+    @State private var bidingstatus = false
 
     @State private var showsReference = false
     @State private var showsDatePicker = false
@@ -65,42 +66,62 @@ private extension HomeScreen {
 // MARK: - empty state: no session on the picked day
 private extension HomeScreen {
     var emptyState: some View {
-        NavigationSplitView(columnVisibility: .constant(.all)) {
-            Text(viewModel.sessions.isEmpty ? "Mulai Tambahkan Sesi" : "Tidak ada sesi di tanggal ini")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .safeAreaInset(edge: .top) {
+        VStack(spacing: 16) {
+            HStack(alignment: .center) {
+                Text("Rekap Sesi")
+                    .font(.largeTitle.bold())
+                Spacer()
                     datePicker
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal)
-                }
-                .safeAreaInset(edge: .bottom) {
-                    Button(action: onStartScan) {
-                        Text("Mulai Scan Ayam")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .buttonBorderShape(.capsule)
-                    .controlSize(.large)
-                    .tint(.actionBlue)
-                    .padding()
-                }
-                .navigationTitle("Rekap Sesi")
-                .navigationSplitViewColumnWidth(340)
-                .containerBackground(.white, for: .navigation)
-                .toolbar(removing: .sidebarToggle)
-        } detail: {
+
+            }
+            .padding(.horizontal)
+
             DetailPanel {
                 ContentUnavailableView {
                     ChickenIllustration(pose: .searching, height: 200)
                 } description: {
-                    Text("Belum ada data")
+                    Text(viewModel.sessions.isEmpty ? "Mulai Tambahkan Sesi" : "Tidak ada sesi di tanggal ini")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
                 }
             }
-            .toolbar(.hidden, for: .navigationBar)
+            
+            
+            .padding(.horizontal)
+            Button(action: onStartScan) {
+                Text("Mulai Scan Ayam")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .buttonBorderShape(.capsule)
+            .controlSize(.large)
+            .tint(.actionBlue)
+            .padding()
         }
-        .navigationSplitViewStyle(.balanced)
+        .padding(.top, 8)
+    
+            
+        
+        .toolbar(.hidden, for: .navigationBar)
+    }
+}
+
+
+
+private struct DetailBackButton: View {
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        Button {
+            dismiss()
+        } label: {
+            Image(systemName: "chevron.left")
+                .font(.headline)
+        }
+        .buttonStyle(.glass)
+        .buttonBorderShape(.circle)
+        .controlSize(.large)
+        .tint(.primary)
     }
 }
 
@@ -108,6 +129,7 @@ private extension HomeScreen {
 // MARK: - recap: session list + selected session detail
 private extension HomeScreen {
     func recap(_ session: ScanSession) -> some View {
+        
         VStack(spacing: 16) {
             HStack {
                 Text("Rekap Sesi")
@@ -118,20 +140,24 @@ private extension HomeScreen {
 
                 datePicker
 
-                Button("Mulai Pemeriksaan", action: onStartScan)
-                    .buttonStyle(.borderedProminent)
-                    .buttonBorderShape(.capsule)
-                    .controlSize(.large)
-                    .tint(.actionBlue)
+               
             }
-
             HStack(alignment: .top, spacing: 12) {
+                
                 sessionList(selected: session)
-                    .frame(width: 300)
-
-                sessionDetail(session)
             }
+           
+
+            Button("Mulai Pemeriksaan", action: onStartScan)
+                .buttonStyle(.borderedProminent)
+                .buttonBorderShape(.capsule)
+                .controlSize(.large)
+                .tint(.actionBlue)
+                .buttonSizing(.flexible)
+    
+            
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding()
         .background(Color.surfaceCream.ignoresSafeArea())
     }
@@ -140,85 +166,65 @@ private extension HomeScreen {
         ScrollView {
             LazyVStack(spacing: 4) {
                 ForEach(viewModel.filteredSessions) { session in
-                    Button {
-                        viewModel.selectedSessionID = session.id
+                    NavigationLink {
+                        sessionDetail(session)
                     } label: {
-                        sessionCard(session, isSelected: session.id == selected.id)
+                        SessionCard(session: session, isSelected: session.id == selected.id)    
                     }
+                 
                     .buttonStyle(.plain)
+                    
                 }
+                .overlay(
+                        RoundedRectangle(cornerRadius: 24, style: .continuous)
+                            .stroke(Color.cardGray, lineWidth: 2)
+                )
+                .padding(5)
             }
             .padding(8)
+            
         }
         .frame(maxHeight: .infinity)
         .background(.white, in: .rect(cornerRadius: 24))
-    }
-
-    func sessionCard(_ session: ScanSession, isSelected: Bool) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .firstTextBaseline) {
-                Text("Sesi #\(session.number)")
-                    .font(.headline)
-
-                Spacer()
-
-                Text(session.startedAt, format: .dateTime.day().month(.wide).year())
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            }
-
-            HStack(alignment: .lastTextBaseline) {
-                Text("\(session.totalCount)")
-                    .font(.system(size: 36, weight: .bold))
-                Text("Ayam")
-                    .font(.headline)
-
-                Spacer()
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Segar : \(session.freshCount)")
-                    Text("Tidak Segar : \(session.notFreshCount)")
-                }
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-            }
-        }
-        .padding()
-        .background(isSelected ? Color.cardGray : .clear, in: .rect(cornerRadius: 16))
-        .contentShape(.rect)
+        
     }
 
     func sessionDetail(_ session: ScanSession) -> some View {
         VStack(alignment: .leading, spacing: 16) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(session.startedAt, format: .dateTime.day().month(.wide).year())
-                    .font(.title3)
-                    .bold()
+            HStack(spacing: 12) {
+                DetailBackButton()
 
-                Text("Sesi Mulai : \(session.startedAt, format: .dateTime.hour().minute())")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-
-                HStack(alignment: .lastTextBaseline) {
-                    Text("\(session.totalCount)")
-                        .font(.system(size: 72, weight: .bold))
-                    Text("Ayam")
-                        .font(.title3)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(session.startedAt, format: .dateTime.day().month(.wide).year())
+                        .font(.title2)
                         .bold()
-                }
 
-                HStack(spacing: 8) {
-                    StatCard(freshness: .fresh, value: session.freshCount)
-                    StatCard(freshness: .notFresh, value: session.notFreshCount)
-                    StatCard(
-                        title: "Waktu/Ayam",
-                        value: Text(session.durationPerChicken, format: .units(allowed: [.seconds], width: .abbreviated))
-                    )
-                    StatCard(
-                        title: "Total Waktu",
-                        value: Text(session.duration, format: .units(allowed: [.hours, .minutes], width: .abbreviated))
-                    )
+                    Text("Sesi Mulai : \(session.startedAt, format: .dateTime.hour().minute())")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                
+                VStack(alignment: .leading, spacing: 4){
+                    HStack(alignment: .lastTextBaseline) {
+                        Text("\(session.totalCount)")
+                            .font(.system(size: 72, weight: .bold))
+                        Text("Ayam")
+                            .font(.title3)
+                            .bold()
+                        
+                        
+                    }
+                    HStack{
+                        StatCard(freshness: .fresh, value: session.freshCount)
+                        StatCard(freshness: .notFresh, value: session.notFreshCount)
+                    }
+                }
+                .padding(8)
+                .background(RoundedRectangle(cornerRadius: 24)
+                    .fill(Color(.white)))
                 .frame(maxWidth: 520)
             }
 
@@ -226,15 +232,10 @@ private extension HomeScreen {
         }
         .padding(20)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-       
-        .background(alignment: .topTrailing) {
-            ChickenIllustration(pose: .searching, height: 300)
-                .padding(.top, 16)
-                .padding(.trailing, 24)
-        }
-        .background(.white, in: .rect(cornerRadius: 24))
-        .clipShape(.rect(cornerRadius: 24))
+        .background(.surfaceCream)
+        .toolbar(.hidden, for: .navigationBar)
     }
+
 
     var recordTable: some View {
         VStack(spacing: 8) {
@@ -260,36 +261,37 @@ private extension HomeScreen {
                 }
             }
 
-            Table(viewModel.filteredRecords) {
-                TableColumn(columnTitle("Waktu")) { record in
-                    Text(record.scannedAt, format: .dateTime.hour().minute().second())
-                }
-                TableColumn(columnTitle("Ayam")) { record in
-                    Text("#\(record.chickenNumber)")
-                        .foregroundStyle(.primary)
-                }
-                TableColumn(columnTitle("Kondisi")) { record in
-                    Text(record.freshness.title)
-                        .foregroundStyle(record.freshness.tint)
-                }
-                TableColumn(columnTitle("Lembap %RH")) { record in
-                    Text(record.humidity, format: .number.precision(.fractionLength(0)))
-                        .foregroundStyle(.primary)
-                }
-                TableColumn(columnTitle("Gas%")) { record in
-                    // lower gas % means worse, colored the same as its result
-                    Text(record.gas, format: .number.precision(.fractionLength(0)))
-                        .foregroundStyle(record.freshness == .notFresh ? Freshness.notFresh.tint : .primary)
-                }
-                TableColumn(columnTitle("Suhu°C")) { record in
-                    Text(record.temperature, format: .number.precision(.fractionLength(1)))
-                        .foregroundStyle(.primary)
+            HStack {
+                Text("Waktu").frame(maxWidth: .infinity, alignment: .leading)
+                Text("Ayam").frame(maxWidth: .infinity, alignment: .leading)
+                Text("Kondisi").frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 16)
+            .padding(.top, 4)
+
+            ScrollView {
+                LazyVStack(spacing: 0) {
+                    ForEach(viewModel.filteredRecords) { record in
+                        HStack {
+                            Text(record.scannedAt, format: .dateTime.hour().minute().second())
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            Text("#\(record.chickenNumber)")
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            Text(record.freshness.title)
+                                .foregroundStyle(record.freshness.tint)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 14)
+
+                        Divider()
+                            .padding(.leading, 16)
+                    }
                 }
             }
-            .scrollContentBackground(.hidden)
-            // headers follow the tint, not foregroundStyle (tested on iPadOS 27);
-            // Table also greys every column after the first, so cells set .primary themselves
-            .tint(.secondary)
+            .background(.white, in: .rect(cornerRadius: 12))
         }
         .padding(12)
         .background(Color.cardGray, in: .rect(cornerRadius: 16))
@@ -349,8 +351,9 @@ private extension HomeScreen {
             }
         )
     }
-
-    HomeScreen(viewModel: RecapViewModel(sessions: sessions)) {
-
+    NavigationStack{
+        HomeScreen(viewModel: RecapViewModel(sessions: sessions)) {
+            
+        }
     }
 }

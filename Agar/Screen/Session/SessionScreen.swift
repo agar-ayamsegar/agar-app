@@ -11,28 +11,98 @@ struct SessionScreen: View {
     @Environment(BluetoothViewModel<ElectrodeSensor>.self) var bluetoothVM
     @Environment(FreshnessViewModel.self) var freshnessVM
     @Environment(PageStateViewModel.self) var pageStateVM
-
+    @Environment(RecapViewModel.self) var recapVM
+    
     @State var sessionVM: SessionViewModel
+    @State private var showSessionList = false
+    
     var session: ScanSession
     
     init(session: ScanSession) {
         self.session = session
         self._sessionVM = State(initialValue: SessionViewModel(session: session))
     }
+    
+    var riwayatSheet: some View {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack(alignment: .lastTextBaseline) {
+                    Text("\(sessionVM.session.totalCount)")
+                        .font(.system(size: 56, weight: .bold))
+                        .contentTransition(.numericText())
+                    Text("Ayam")
+                        .font(.title3)
+                        .bold()
+                }
+
+                HStack(spacing: 8) {
+                    StatCard(freshness: .fresh, value: sessionVM.session.freshCount)
+                    StatCard(freshness: .notFresh, value: sessionVM.session.notFreshCount)
+                }
+
+                VStack(spacing: 0) {
+                    HStack {
+                        Text("Waktu").frame(maxWidth: .infinity, alignment: .leading)
+                        Text("Ayam").frame(maxWidth: .infinity, alignment: .leading)
+                        Text("Kondisi").frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+
+                    ScrollView {
+                        LazyVStack(spacing: 0) {
+                            // newest scan on top, the way the mock reads
+                            ForEach(sessionVM.session.records.reversed()) { record in
+                                historyRow(record)
+                                Divider()
+                            }
+                        }
+                    }
+                    .background(.white, in: .rect(cornerRadius: 12))
+                }
+            }
+            .animation(.default, value: sessionVM.session.totalCount)
+            .padding(20)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .background(Color.surfaceCream)
+            .navigationTitle("Riwayat Pemeriksaan")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button {
+                        showSessionList = false
+                    } label: {
+                        Image(systemName: "xmark")
+                    }
+                }
+            }
+        }
+    }
 
     var body: some View {
-        NavigationSplitView(columnVisibility: .constant(.all)) {
-            sidebar
-                .padding()
-                .navigationSplitViewColumnWidth(340)
-                .containerBackground(.white, for: .navigation)
-                .toolbar(removing: .sidebarToggle)
-                .toolbar(.hidden, for: .navigationBar)
-        } detail: {
+        VStack() {
             machinePanel
-                .toolbar(.hidden, for: .navigationBar)
+                .toolbar{
+                    ToolbarItem(placement: .topBarLeading){
+                        sessionHeader
+                    }
+                    .sharedBackgroundVisibility(.hidden)
+
+                    ToolbarItem (placement: .topBarTrailing){
+                        Button{
+                            showSessionList = true
+                        }label:{
+                            Image(systemName: "line.3.horizontal")
+                        }
+                    }
+                }
+                .sheet(isPresented: $showSessionList){
+                    riwayatSheet
+                }
         }
-        .navigationSplitViewStyle(.balanced)
+        .background(Color.surfaceCream.ignoresSafeArea())
         .onChange(of: bluetoothVM.state, initial: true) { _, state in
             sessionVM.connection(state)
         }
@@ -48,36 +118,57 @@ struct SessionScreen: View {
             }
         }
         .task {
-            // already paired from an earlier session, nothing to prepare
+            
             guard bluetoothVM.state != .connected else { return }
             await bluetoothVM.connect()
+            
+        }
+        .safeAreaInset(edge: .bottom) {
+            Text("Tahan Untuk Akhiri Sesi")
+                .font(.headline)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 18)
+                .glassEffect(.regular, in: .capsule)
+                .contentShape(.capsule)
+                .onLongPressGesture(minimumDuration: 1) {
+                    pageStateVM.setState(.summary(sessionVM.endSession()))
+                }
+                .padding(.horizontal)
+                .opacity(sessionVM.canEndSession ? 1 : 0.4)
+                .allowsHitTesting(sessionVM.canEndSession)
         }
     }
 }
 
 
-#Preview("Preparing", traits: .landscapeLeft) {
+#Preview("Preparing") {
     SessionScreen(session: ScanSession(number: 1))
     .environment(BluetoothViewModel<ElectrodeSensor>())
     .environment(FreshnessViewModel())
+    .environment(PageStateViewModel())
+    .environment(RecapViewModel())
 }
 
-#Preview("Ready", traits: .landscapeLeft) {
+#Preview("Ready") {
     SessionScreen(session: ScanSession(number: 1))
     .environment(BluetoothViewModel<ElectrodeSensor>())
     .environment(FreshnessViewModel())
+    .environment(PageStateViewModel())
+    .environment(RecapViewModel())
 }
 
-#Preview("Scanning", traits: .landscapeLeft) {
+#Preview("Scanning") {
     let session = ScanSession(number: 137, records: (1...65).map {
         ScanRecord(chickenNumber: $0, freshness: $0.isMultiple(of: 30) ? .notFresh : .fresh)
     })
     SessionScreen(session: session)
     .environment(BluetoothViewModel<ElectrodeSensor>())
     .environment(FreshnessViewModel())
+    .environment(PageStateViewModel())
+    .environment(RecapViewModel())
 }
 
-#Preview("Fresh", traits: .landscapeLeft) {
+#Preview("Fresh") {
     let session = ScanSession(number: 137, records: (1...65).map {
         ScanRecord(chickenNumber: $0, freshness: $0.isMultiple(of: 30) ? .notFresh : .fresh)
     })
@@ -86,9 +177,11 @@ struct SessionScreen: View {
     SessionScreen(session: session)
     .environment(BluetoothViewModel<ElectrodeSensor>())
     .environment(FreshnessViewModel())
+    .environment(PageStateViewModel())
+    .environment(RecapViewModel())
 }
 
-#Preview("Next Chicken", traits: .landscapeLeft) {
+#Preview("Next Chicken") {
     let session = ScanSession(number: 137, records: (1...65).map {
         ScanRecord(chickenNumber: $0, freshness: $0.isMultiple(of: 30) ? .notFresh : .fresh)
     })
@@ -96,9 +189,11 @@ struct SessionScreen: View {
     SessionScreen(session: session)
     .environment(BluetoothViewModel<ElectrodeSensor>())
     .environment(FreshnessViewModel())
+    .environment(PageStateViewModel())
+    .environment(RecapViewModel())
 }
 
-#Preview("Not Fresh", traits: .landscapeLeft) {
+#Preview("Not Fresh") {
     let session = ScanSession(number: 137, records: (1...65).map {
         ScanRecord(chickenNumber: $0, freshness: $0.isMultiple(of: 30) ? .notFresh : .fresh)
     })
@@ -107,4 +202,6 @@ struct SessionScreen: View {
     SessionScreen(session: session)
     .environment(BluetoothViewModel<ElectrodeSensor>())
     .environment(FreshnessViewModel())
+    .environment(PageStateViewModel())
+    .environment(RecapViewModel())
 }
