@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct AgarApp: App {
@@ -13,5 +14,6 @@ struct AgarApp: App {
         WindowGroup {
             MainScreen()
         }
+        .modelContainer(for: [ScanSession.self, ScanRecord.self])
     }
 }

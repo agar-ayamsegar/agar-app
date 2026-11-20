@@ -8,7 +8,7 @@
 import SwiftUI
 
 
-enum Freshness: String, Sendable, Hashable, CaseIterable {
+enum Freshness: String, Sendable , Codable ,Hashable, CaseIterable {
     case fresh
     case notFresh
     
