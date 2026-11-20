@@ -6,18 +6,35 @@
 //
 
 import SwiftUI
-
+import SwiftData
 
 struct HomeScreen: View {
+    @Query(sort: \ScanSession.startedAt, order: .reverse) private var sessions: [ScanSession]
+        @Environment(\.modelContext) private var modelContext
+    
     @Bindable var viewModel: RecapViewModel
     var onStartScan: () -> Void
     @State private var bidingstatus = false
 
     @State private var showsReference = false
     @State private var showsDatePicker = false
+    var filteredSessions: [ScanSession] {
+        sessions.filter { Calendar.current.isDate($0.startedAt, inSameDayAs: viewModel.selectedDate) }
+    }
+
+    var selectedSession: ScanSession? {
+        filteredSessions.first { $0.id == viewModel.selectedSessionID } ?? filteredSessions.first
+    }
+
+    var filteredRecords: [ScanRecord] {
+        guard let records = selectedSession?.records else { return [] }
+        let ordered = records.sorted { $0.scannedAt < $1.scannedAt }
+        guard let filter = viewModel.recordFilter else { return ordered }
+        return ordered.filter { $0.freshness == filter }
+    }
 
     var body: some View {
-        if let session = viewModel.selectedSession {
+        if let session = selectedSession {
             recap(session)
         } else {
             emptyState
@@ -80,7 +97,7 @@ private extension HomeScreen {
                 ContentUnavailableView {
                     ChickenIllustration(pose: .searching, height: 200)
                 } description: {
-                    Text(viewModel.sessions.isEmpty ? "Mulai Tambahkan Sesi" : "Tidak ada sesi di tanggal ini")
+                    Text(sessions.isEmpty ? "Mulai Tambahkan Sesi" : "Tidak ada sesi di tanggal ini")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
@@ -165,7 +182,7 @@ private extension HomeScreen {
     func sessionList(selected: ScanSession) -> some View {
         ScrollView {
             LazyVStack(spacing: 4) {
-                ForEach(viewModel.filteredSessions) { session in
+                ForEach(filteredSessions) { session in
                     NavigationLink {
                         sessionDetail(session)
                     } label: {
@@ -273,7 +290,7 @@ private extension HomeScreen {
 
             ScrollView {
                 LazyVStack(spacing: 0) {
-                    ForEach(viewModel.filteredRecords) { record in
+                    ForEach(filteredRecords) { record in
                         HStack {
                             Text(record.scannedAt, format: .dateTime.hour().minute().second())
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -325,35 +342,41 @@ private extension HomeScreen {
 }
 
 
-#Preview("Empty", traits: .landscapeLeft) {
-    HomeScreen(viewModel: RecapViewModel()) {
+@MainActor
+private func previewContainer() -> ModelContainer {
+    let container = try! ModelContainer(
+        for: ScanSession.self,
+        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+    )
 
-    }
-}
-
-#Preview("With Sessions", traits: .landscapeLeft) {
-    let sessions = (134...137).map { number in
+    for number in 134...137 {
         let startedAt = Date.now.addingTimeInterval(Double(number - 138) * 15 * 60)
-        return ScanSession(
+        let session = ScanSession(
             number: number,
             startedAt: startedAt,
-            endedAt: startedAt.addingTimeInterval(12 * 60),
-            records: (1...20).map {
-                let notFresh = $0.isMultiple(of: 4)
-                return ScanRecord(
-                    chickenNumber: $0,
-                    scannedAt: startedAt.addingTimeInterval(Double($0) * 20),
-                    freshness: notFresh ? .notFresh : .fresh,
-                    humidity: 80 + Float($0 % 12),
-                    gas: notFresh ? 18 + Float($0 % 5) : 30 + Float($0 * 7 % 40),
-                    temperature: 26.4 + Float($0 % 6) * 0.9
-                )
-            }
+            endedAt: startedAt.addingTimeInterval(12 * 60)
         )
-    }
-    NavigationStack{
-        HomeScreen(viewModel: RecapViewModel(sessions: sessions)) {
-            
+        session.records = (1...20).map { index in
+            ScanRecord(
+                chickenNumber: index,
+                scannedAt: startedAt.addingTimeInterval(Double(index) * 20),
+                freshness: index.isMultiple(of: 4) ? .notFresh : .fresh
+            )
         }
+        container.mainContext.insert(session)
     }
+
+    return container
+}
+
+#Preview("Empty") {
+    HomeScreen(viewModel: RecapViewModel()) { }
+        .modelContainer(for: ScanSession.self, inMemory: true)
+}
+
+#Preview("With Sessions") {
+    NavigationStack {
+        HomeScreen(viewModel: RecapViewModel()) { }
+    }
+    .modelContainer(previewContainer())
 }

@@ -6,15 +6,18 @@
 //
 
 import Foundation
+import SwiftData
 
-struct ScanRecord: Identifiable, Sendable, Hashable {
-    let id: UUID
-    let chickenNumber: Int
-    let scannedAt: Date
-    let freshness: Freshness
-    let humidity: Float    
-    let gas: Float         
-    let temperature: Float 
+@Model
+final class ScanRecord: Identifiable, Hashable {
+    @Attribute(.unique) var id: UUID
+    var chickenNumber: Int
+    var scannedAt: Date
+    var freshness: Freshness
+    var humidity: Float
+    var gas: Float
+    var temperature: Float
+    var session: ScanSession?
 
     init(
         id: UUID = UUID(),
