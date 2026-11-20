@@ -44,6 +44,7 @@ class BluetoothViewModel<T: Decodable> {
     
     // connecting to service and running the subscribe message
     func connect() async {
+        characteristics.removeAll()
         state = .scanning
         do {
             try await bluetoothManager?.connect()
