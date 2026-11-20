@@ -28,7 +28,7 @@ enum Fake {
     static let airRs135: Float = 20.0
 
     static let emptyBox = rows(count: 120, mq137: 525, mq135: 640, rs137: airRs137, rs135: airRs135)
-}
+}               
 
 
 enum FakeChicken: String, CaseIterable, Identifiable {

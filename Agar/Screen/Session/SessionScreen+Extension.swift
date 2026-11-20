@@ -25,8 +25,8 @@ extension SessionScreen {
                 ready
             case .scanning(let chickenNumber, let progress):
                 scanning(chickenNumber: chickenNumber, progress: progress)
-            case .result(let record):
-                result(record)
+            case .result(let chickenNumber, let freshness):
+                result(chickenNumber: chickenNumber, freshness: freshness)
             case .nextChicken:
                 nextChicken
             }
@@ -40,8 +40,8 @@ extension SessionScreen {
 
     var panelBackground: Color {
         switch sessionVM.machineState {
-        case .result(let record):
-            return record.freshness.tint
+        case .result(_, let freshness):
+            return freshness.tint
         case .preparing, .connectionFailed, .ready, .scanning, .nextChicken:
             return .white
         }
@@ -148,20 +148,20 @@ extension SessionScreen {
         .frame(maxWidth: 460)
     }
 
-    func result(_ record: ScanRecord) -> some View {
+    func result(chickenNumber: Int, freshness: Freshness) -> some View {
         VStack(spacing: 16) {
-            headline(caption: "Ayam #\(record.chickenNumber)", title: record.freshness.title)
+            headline(caption: "Ayam #\(chickenNumber)", title: freshness.title)
 
             if let grade = freshnessVM.grade, let score = freshnessVM.score {
-                GradeSlider(score: score, grade: grade, tint: record.freshness.tint)
+                GradeSlider(score: score, grade: grade, tint: freshness.tint)
                     .frame(maxWidth: 420)
                     .layoutPriority(1)
             }
 
             // smaller with the slider so the bubble text always fits on an iPhone
-            ChickenIllustration(pose: record.freshness.pose, height: freshnessVM.grade == nil ? 440 : 240)
+            ChickenIllustration(pose: freshness.pose, height: freshnessVM.grade == nil ? 440 : 240)
 
-            if let instruction = record.freshness.instruction {
+            if let instruction = freshness.instruction {
                 Text(instruction)
                     .font(.title3)
                     .bold()

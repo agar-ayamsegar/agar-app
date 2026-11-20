@@ -6,13 +6,15 @@
 //
 
 import Foundation
+import SwiftData
 
-
-struct ScanSession: Identifiable, Sendable, Hashable {
-    let id: UUID
-    let number: Int
-    let startedAt: Date
+@Model
+final class ScanSession: Identifiable, Hashable {
+    @Attribute(.unique) var id: UUID
+    var number: Int
+    var startedAt: Date
     var endedAt: Date?
+    @Relationship(deleteRule: .cascade, inverse: \ScanRecord.session)
     var records: [ScanRecord]
 
     init(id: UUID = UUID(), number: Int, startedAt: Date = .now, endedAt: Date? = nil, records: [ScanRecord] = []) {

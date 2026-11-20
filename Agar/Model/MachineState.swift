@@ -12,6 +12,6 @@ enum MachineState: Sendable, Hashable {
     case connectionFailed
     case ready
     case scanning(chickenNumber: Int, progress: Double)
-    case result(ScanRecord)
+    case result(chickenNumber: Int, freshness:Freshness)
     case nextChicken
 }
