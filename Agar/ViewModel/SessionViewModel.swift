@@ -80,7 +80,7 @@ class SessionViewModel {
     func record(_ freshness: Freshness) {
         let record = ScanRecord(chickenNumber: session.totalCount + 1, freshness: freshness)
         session.records.append(record)
-        machineState = .result(record)
+        machineState = .result(chickenNumber: record.chickenNumber, freshness: record.freshness)
         stabRows.removeAll()
         waitingForRemoval = true
     }

@@ -25,8 +25,8 @@ extension SessionScreen {
                 ready
             case .scanning(let chickenNumber, let progress):
                 scanning(chickenNumber: chickenNumber, progress: progress)
-            case .result(let record):
-                result(record)
+            case .result(let chickenNumber, let freshness):
+                result(chickenNumber: chickenNumber, freshness: freshness)
             case .nextChicken:
                 nextChicken
             }
@@ -40,8 +40,8 @@ extension SessionScreen {
 
     var panelBackground: Color {
         switch sessionVM.machineState {
-        case .result(let record):
-            return record.freshness.tint
+        case .result(_, let freshness):
+            return freshness.tint
         case .preparing, .connectionFailed, .ready, .scanning, .nextChicken:
             return .white
         }
@@ -148,13 +148,13 @@ extension SessionScreen {
         .frame(maxWidth: 460)
     }
 
-    func result(_ record: ScanRecord) -> some View {
+    func result(chickenNumber: Int, freshness: Freshness) -> some View {
         VStack(spacing: 16) {
-            headline(caption: "Ayam #\(record.chickenNumber)", title: record.freshness.title)
+            headline(caption: "Ayam #\(chickenNumber)", title: freshness.title)
 
-            ChickenIllustration(pose: record.freshness.pose, height: 440)
+            ChickenIllustration(pose: freshness.pose, height: 440)
 
-            if let instruction = record.freshness.instruction {
+            if let instruction = freshness.instruction {
                 Text(instruction)
                     .font(.title3)
                     .bold()

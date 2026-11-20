@@ -54,7 +54,7 @@ struct SessionScreen: View {
                     ScrollView {
                         LazyVStack(spacing: 0) {
                             // newest scan on top, the way the mock reads
-                            ForEach(sessionVM.session.records.reversed()) { record in
+                            ForEach(sessionVM.session.records.sorted { $0.scannedAt > $1.scannedAt }) { record in 
                                 historyRow(record)
                                 Divider()
                             }
