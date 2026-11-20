@@ -53,8 +53,7 @@ struct SessionScreen: View {
 
                     ScrollView {
                         LazyVStack(spacing: 0) {
-                            // newest scan on top, the way the mock reads
-                            ForEach(sessionVM.session.records.sorted { $0.scannedAt > $1.scannedAt }) { record in 
+                            ForEach(sessionVM.session.records.sorted { $0.scannedAt > $1.scannedAt }) { record in
                                 historyRow(record)
                                 Divider()
                             }
@@ -103,7 +102,7 @@ struct SessionScreen: View {
                 }
         }
         .background(Color.surfaceCream.ignoresSafeArea())
-        .onChange(of: bluetoothVM.state, initial: true) { _, state in
+        .onChange(of: bluetoothVM.state) { _, state in
             sessionVM.connection(state)
         }
         .onChange(of: bluetoothVM.characteristics.count) {
@@ -119,7 +118,6 @@ struct SessionScreen: View {
         }
         .task {
             
-            guard bluetoothVM.state != .connected else { return }
             await bluetoothVM.connect()
             
         }
