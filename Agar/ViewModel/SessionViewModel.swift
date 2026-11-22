@@ -47,8 +47,11 @@ class SessionViewModel {
             stabRows.removeAll()
 
             switch machineState {
-            case .scanning, .result:
+            case .scanning:
                 machineState = session.records.isEmpty ? .ready : .nextChicken
+            case .result:
+                // the result stays on screen after the probe comes out, the next stab clears it
+                break
             case .preparing, .connectionFailed, .ready, .nextChicken:
                 break
             }
@@ -58,10 +61,11 @@ class SessionViewModel {
         // the chicken we just judged has not come off yet
         guard !waitingForRemoval else { return false }
 
+        // a result only gets here after the probe came out and went into a new chicken
         switch machineState {
-        case .preparing, .connectionFailed, .result:
+        case .preparing, .connectionFailed:
             return false
-        case .ready, .nextChicken, .scanning:
+        case .ready, .nextChicken, .scanning, .result:
             break
         }
 

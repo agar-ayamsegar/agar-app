@@ -1,0 +1,112 @@
+//
+//  GradeSlider.swift
+//  Agar
+//
+
+import SwiftUI
+
+// 1 to 5 track with a dot that can sit between two numbers (2.5),
+// and a card hanging from the dot that says what to do with the meat
+struct GradeSlider: View {
+    let score: Double
+    let grade: FreshnessGrade
+    let tint: Color
+
+    // the card is wider than the track so the pointer still lands on it at 1 and 5
+    private let inset: CGFloat = 48
+    private let trackY: CGFloat = 14
+    private let knobSize: CGFloat = 30
+    private let pointerTop: CGFloat = 26
+    private let areaHeight: CGFloat = 64
+
+    private var fraction: CGFloat {
+        CGFloat(min(max((score - 1) / 4, 0), 1))
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            GeometryReader { proxy in
+                let width = proxy.size.width
+                let track = width - inset * 2
+                let knobX = inset + track * fraction
+
+                ZStack {
+                    Rectangle()
+                        .fill(.white)
+                        .frame(width: track, height: 4)
+                        .position(x: width / 2, y: trackY)
+
+                    ForEach(1...5, id: \.self) { step in
+                        let x = inset + track * CGFloat(step - 1) / 4
+                        let tick: CGFloat = step == 1 || step == 5 ? 14 : 10
+
+                        Rectangle()
+                            .fill(.white)
+                            .frame(width: 3, height: tick)
+                            .position(x: x, y: trackY + tick / 2)
+
+                        // the number under the dot is covered by the pointer
+                        Text("\(step)")
+                            .font(.subheadline)
+                            .foregroundStyle(.white)
+                            .position(x: x, y: trackY + 26)
+                            .opacity(abs(Double(step) - score) < 0.35 ? 0 : 1)
+                    }
+
+                    Pointer()
+                        .fill(.white)
+                        .frame(width: 48, height: areaHeight - pointerTop + 2)
+                        .position(x: knobX, y: (pointerTop + areaHeight + 2) / 2)
+
+                    Circle()
+                        .fill(Color.surfaceCream)
+                        .frame(width: knobSize, height: knobSize)
+                        .shadow(color: .black.opacity(0.15), radius: 2, y: 1)
+                        .position(x: knobX, y: trackY)
+                }
+            }
+            .frame(height: areaHeight)
+            .animation(.spring, value: score)
+
+            // fixedSize so a tall screen squeezes the drawing, never cuts the text with "..."
+            VStack(spacing: 4) {
+                Text(grade.label)
+                    .font(.headline)
+                Text(grade.detail)
+                    .font(.footnote)
+                    .multilineTextAlignment(.center)
+            }
+            .fixedSize(horizontal: false, vertical: true)
+            .foregroundStyle(tint)
+            .padding(.vertical, 14)
+            .padding(.horizontal, 16)
+            .frame(maxWidth: .infinity)
+            .background(Color.white, in: .rect(cornerRadius: 24))
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Skor \(score.formatted(.number.precision(.fractionLength(1)))) dari 5, \(grade.label)")
+    }
+}
+
+// triangle pointing up, its base joins the card below
+// nonisolated because the project defaults to MainActor and Shape draws off the main actor
+nonisolated private struct Pointer: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.midX, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+        path.closeSubpath()
+        return path
+    }
+}
+
+#Preview {
+    VStack(spacing: 32) {
+        GradeSlider(score: 1.0, grade: .one, tint: .notFreshRed)
+        GradeSlider(score: 2.5, grade: .three, tint: .freshGreen)
+        GradeSlider(score: 4.0, grade: .four, tint: .freshGreen)
+    }
+    .padding(24)
+    .background(Color.freshGreen)
+}
