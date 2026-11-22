@@ -15,6 +15,8 @@ struct SessionScreen: View {
     
     @State var sessionVM: SessionViewModel
     @State private var showSessionList = false
+    // a scan the grade can't be trusted for, the user has to stab again
+    @State private var scanMessage: String?
     
     var session: ScanSession
     
@@ -113,9 +115,22 @@ struct SessionScreen: View {
             guard sessionVM.collect(row) else { return }
             freshnessVM.scan(sessionVM.stabRows)
 
-            if case .scanned(let freshness) = freshnessVM.state {
+            switch freshnessVM.state {
+            case .scanned(let freshness):
                 sessionVM.record(freshness)
+            case .error(let message):
+                scanMessage = message
+            case .idle:
+                break
             }
+        }
+        .alert(
+            "Coba Tusuk Lagi",
+            isPresented: Binding(get: { scanMessage != nil }, set: { if !$0 { scanMessage = nil } })
+        ) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(scanMessage ?? "")
         }
         .task {
             
