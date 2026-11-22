@@ -152,7 +152,14 @@ extension SessionScreen {
         VStack(spacing: 16) {
             headline(caption: "Ayam #\(record.chickenNumber)", title: record.freshness.title)
 
-            ChickenIllustration(pose: record.freshness.pose, height: 440)
+            if let grade = freshnessVM.grade, let score = freshnessVM.score {
+                GradeSlider(score: score, grade: grade, tint: record.freshness.tint)
+                    .frame(maxWidth: 420)
+                    .layoutPriority(1)
+            }
+
+            // smaller with the slider so the bubble text always fits on an iPhone
+            ChickenIllustration(pose: record.freshness.pose, height: freshnessVM.grade == nil ? 440 : 240)
 
             if let instruction = record.freshness.instruction {
                 Text(instruction)
