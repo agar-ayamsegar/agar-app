@@ -72,7 +72,7 @@ class FreshnessViewModel {
     static let greyZoneOhm: Float = 636
     static let gradeTwoOhm: Float = 610
     // above this the meat is still cold or the skin dried out, a grade would be a guess
-    static let maxTrustedOhm: Float = 800
+    static let maxTrustedOhm: Float = 850
 
     // how many rows a scan needs before it can decide
     static var rowsPerScan: Int { settleSeconds + sampleCount }
