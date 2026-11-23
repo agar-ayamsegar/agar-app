@@ -20,10 +20,15 @@ struct StatCard: View {
                 .font(.caption)
                 .foregroundStyle(tint.opacity(0.75))
 
+            // only the number is expanded black; the label above it stays plain
             value
-                .font(.system(size: valueSize, weight: .bold))
+                .font(.system(size: valueSize, weight: .black).width(.expanded))
                 .foregroundStyle(tint)
                 .contentTransition(.numericText())
+                // expanded is wider than the bold it replaces, so a long count shrinks
+                // rather than pushing out of its card
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
