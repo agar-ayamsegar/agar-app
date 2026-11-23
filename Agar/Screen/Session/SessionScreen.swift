@@ -81,6 +81,9 @@ struct SessionScreen: View {
                     riwayatSheet
                 }
         }
+        // the panel takes the whole height rather than hugging its content, so its foot
+        // and the action sitting on it land in the same place on every machine state
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.surfaceCream.ignoresSafeArea())
         .onChange(of: bluetoothVM.state) { _, state in
             sessionVM.connection(state)
@@ -121,8 +124,10 @@ struct SessionScreen: View {
             if case .result(_, .notFresh) = state { true } else { false }
         }
         .bottomAction {
-            // no session to end while the machine is still coming up
-            if sessionVM.canEndSession {
+            // nothing to end while the machine is still coming up, so it is invisible and
+            // untouchable rather than absent: dropping it outright let the panel above grow
+            // into the gap, which moved the action sitting at the foot of that panel
+            Group {
                 Text("Tahan Untuk Akhiri Sesi")
                     .font(.headline)
                     .foregroundStyle(holdProgress > 0 ? Color.white : Color.primary)
@@ -146,6 +151,8 @@ struct SessionScreen: View {
                         }
                     }
             }
+            .opacity(sessionVM.canEndSession ? 1 : 0)
+            .allowsHitTesting(sessionVM.canEndSession)
         }
     }
 }

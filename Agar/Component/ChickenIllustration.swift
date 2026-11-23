@@ -12,6 +12,9 @@ import Lottie
 struct ChickenIllustration: View {
     var pose: ChickenPose
     var height: CGFloat = 280
+    /// Treats `height` as a ceiling rather than a fixed size, so the art gives way when the
+    /// panel is tight instead of pushing everything below it further down the screen.
+    var flexible: Bool = false
     
     private func loadinganimation() async -> LottieAnimationSource? {
         let name = pose.rawValue
@@ -33,7 +36,8 @@ struct ChickenIllustration: View {
             }
             .playing(loopMode: .loop)
         }
-        .frame(height: height)
+        .frame(maxHeight: flexible ? height : nil)
+        .frame(height: flexible ? nil : height)
         .accessibilityHidden(true)
     }
 
