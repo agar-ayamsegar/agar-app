@@ -103,7 +103,6 @@ private extension HomeScreen {
                 }
             }
             
-            
             .padding(.horizontal)
             Button(action: onStartScan) {
                 Text("Mulai Scan Ayam")
@@ -116,9 +115,6 @@ private extension HomeScreen {
             .padding()
         }
         .padding(.top, 8)
-    
-            
-        
         .toolbar(.hidden, for: .navigationBar)
     }
 }
