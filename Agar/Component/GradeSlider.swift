@@ -14,6 +14,8 @@ struct GradeSlider: View {
 
     // the card is wider than the track so the pointer still lands on it at 1 and 5
     private let inset: CGFloat = 48
+    private let tickWidth: CGFloat = 3
+    private let trackHeight: CGFloat = 4
     private let trackY: CGFloat = 14
     private let knobSize: CGFloat = 30
     private let pointerTop: CGFloat = 26
@@ -31,19 +33,21 @@ struct GradeSlider: View {
                 let knobX = inset + track * fraction
 
                 ZStack {
+                    // stops at the inner edge of the end ticks, no stub past 1 and 5
                     Rectangle()
                         .fill(.white)
-                        .frame(width: track, height: 4)
+                        .frame(width: track - tickWidth, height: trackHeight)
                         .position(x: width / 2, y: trackY)
 
                     ForEach(1...5, id: \.self) { step in
                         let x = inset + track * CGFloat(step - 1) / 4
                         let tick: CGFloat = step == 1 || step == 5 ? 14 : 10
 
+                        // tick tops flush with the top of the track
                         Rectangle()
                             .fill(.white)
-                            .frame(width: 3, height: tick)
-                            .position(x: x, y: trackY + tick / 2)
+                            .frame(width: tickWidth, height: tick)
+                            .position(x: x, y: trackY + tick / 2 - trackHeight / 2)
 
                         // the number under the dot is covered by the pointer
                         Text("\(step)")
