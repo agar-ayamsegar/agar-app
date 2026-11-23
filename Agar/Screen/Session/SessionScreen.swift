@@ -143,6 +143,10 @@ struct SessionScreen: View {
             guard phase == .active, !bluetoothVM.isLive else { return }
             Task { await bluetoothVM.connect() }
         }
+        // buzz on a bad bird, the verdict is easy to miss over machine noise
+        .sensoryFeedback(.error, trigger: sessionVM.machineState) { _, state in
+            if case .result(_, .notFresh) = state { true } else { false }
+        }
         .bottomAction {
             // no session to end while the machine is still coming up
             if sessionVM.canEndSession {
