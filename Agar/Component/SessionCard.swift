@@ -12,30 +12,32 @@ struct SessionCard: View {
     var isSelected: Bool = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .firstTextBaseline) {
+        HStack(alignment: .top, spacing: 12) {
+            VStack(alignment: .leading, spacing: 10) {
                 Text("Sesi #\(session.number)")
                     .font(.system(size: 17, weight: .bold))
 
-                Spacer(minLength: 12)
+                HStack(alignment: .lastTextBaseline, spacing: 6) {
+                    Text("\(session.totalCount)")
+                        .font(.system(size: 40, weight: .black).width(.expanded))
+                        .contentTransition(.numericText())
 
-                Text(session.startedAt, format: .dateTime.day().month(.wide).year())
-                    .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
+                    Text("Ayam")
+                        .font(.system(size: 16, weight: .black).width(.expanded))
+                }
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
             }
 
-            HStack(alignment: .lastTextBaseline) {
-                Text("\(session.totalCount)")
-                    .font(.system(size: 40, weight: .bold))
-                    .contentTransition(.numericText())
+            Spacer(minLength: 12)
 
-                Text("Ayam")
-                    .font(.system(size: 17, weight: .bold))
+            // date over the counts sharing one left edge, the way the sketch has them.
+            // right-aligning the date instead left it starting short of the labels below it
+            VStack(alignment: .leading, spacing: 12) {
+                Text(session.startedAt, format: .dateTime.day().month(.wide).year())
 
-                Spacer(minLength: 12)
-
-                // a grid rather than two Texts, so the colons sit under each other the way
-                // the sketch has them instead of ragging off the length of the label
+                // a grid, so the colons sit under each other rather than ragging off the
+                // length of the label in front of them
                 Grid(alignment: .leading, horizontalSpacing: 4, verticalSpacing: 2) {
                     GridRow {
                         Text("Segar")
@@ -46,9 +48,10 @@ struct SessionCard: View {
                         Text(": \(session.notFreshCount)")
                     }
                 }
-                .font(.system(size: 11))
-                .foregroundStyle(.secondary)
             }
+            .font(.system(size: 11))
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: true, vertical: false)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
