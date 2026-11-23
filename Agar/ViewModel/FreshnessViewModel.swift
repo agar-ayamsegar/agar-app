@@ -42,6 +42,14 @@ enum FreshnessGrade: CaseIterable, Sendable {
         }
     }
 
+    // borderline is still cookable, so it does not get the "set this one aside" warning
+    var instruction: String? {
+        switch self {
+        case .four, .three, .borderline: nil
+        case .two, .one: "Pisahkan Ayam ini !"
+        }
+    }
+
     // the screen still has two colours, grade 3 and 4 count as fresh
     var freshness: Freshness {
         switch self {
