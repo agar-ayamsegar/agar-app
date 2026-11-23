@@ -91,7 +91,7 @@ struct RecordTable: View {
             ayam: Text("#\(record.chickenNumber)"),
             kondisi: Text(record.freshness.title).foregroundStyle(record.freshness.tint)
         )
-        .font(.subheadline)
+        .font(.subheadline.weight(.semibold))
         .padding(.vertical, 13)
     }
 
