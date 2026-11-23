@@ -7,16 +7,22 @@ import SwiftUI
 
 /// The Waktu / Ayam / Kondisi table.
 ///
-/// One white card with the column header as a grey strip inside it, rather than a grey card
-/// wrapped around a white one. Shared by the recap detail screen and the riwayat sheet; the
-/// sheet passes no filter, so the segmented control is only built when there is one.
+/// A white card with a grey block set inside it, so the white reads as a border all the way
+/// around: above, below and on both sides. The grey takes whatever height is left whether or
+/// not there are rows yet, rather than collapsing onto the header and leaving the card half
+/// empty. Shared by the recap detail screen and the riwayat sheet; the sheet passes no
+/// filter, so the segmented control is only built when there is one.
 struct RecordTable: View {
     let records: [ScanRecord]
     var filter: Binding<Freshness?>?
     var onInfo: (() -> Void)?
 
+    /// Keeps the column titles lined up under the segmented control above them rather than
+    /// sitting further in than it.
+    private let columnInset: CGFloat = 12
+
     var body: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: 10) {
             if let filter {
                 HStack(spacing: 10) {
                     Picker("Filter", selection: filter) {
@@ -35,75 +41,72 @@ struct RecordTable: View {
                         .foregroundStyle(.tint)
                     }
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 12)
             }
 
-            columnHeader
+            VStack(spacing: 0) {
+                columnHeader
 
-            if records.isEmpty {
-                Text("Belum ada ayam diperiksa")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-                    .padding(.vertical, 32)
-            } else {
-                ScrollView {
-                    LazyVStack(spacing: 0) {
-                        ForEach(records) { record in
-                            row(record)
+                if records.isEmpty {
+                    Text("Belum ada ayam diperiksa")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 0) {
+                            ForEach(records) { record in
+                                row(record)
 
-                            if record.id != records.last?.id {
-                                Divider().padding(.leading, 16)
+                                if record.id != records.last?.id {
+                                    Divider().padding(.horizontal, columnInset)
+                                }
                             }
                         }
                     }
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .background(Color.cardGray, in: .rect(cornerRadius: 14))
+            .clipShape(.rect(cornerRadius: 14))
         }
+        .padding(12)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(.white, in: .rect(cornerRadius: 20))
-        .overlay {
-            RoundedRectangle(cornerRadius: 20)
-                .strokeBorder(Color.cardGray, lineWidth: 1.5)
-        }
-        // the grey header strip squares off against the card corners without this
-        .clipShape(.rect(cornerRadius: 20))
     }
 
     private var columnHeader: some View {
-        HStack {
-            Text("Waktu").frame(maxWidth: .infinity, alignment: .leading)
-            Text("Ayam").frame(maxWidth: .infinity, alignment: .leading)
-            Text("Kondisi").frame(maxWidth: .infinity, alignment: .leading)
-        }
+        columns(
+            waktu: Text("Waktu"),
+            ayam: Text("Ayam"),
+            kondisi: Text("Kondisi")
+        )
         .font(.subheadline.weight(.semibold))
         .foregroundStyle(.secondary)
-        .padding(.horizontal, 16)
         .padding(.vertical, 10)
-        .background(Color.cardGray)
     }
 
     private func row(_ record: ScanRecord) -> some View {
-        HStack {
-            Text(record.scannedAt, format: .dateTime.hour().minute().second())
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-            Text("#\(record.chickenNumber)")
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-            Text(record.freshness.title)
-                .foregroundStyle(record.freshness.tint)
-                .frame(maxWidth: .infinity, alignment: .leading)
-        }
+        columns(
+            waktu: Text(record.scannedAt, format: .dateTime.hour().minute().second()),
+            ayam: Text("#\(record.chickenNumber)"),
+            kondisi: Text(record.freshness.title).foregroundStyle(record.freshness.tint)
+        )
         .font(.subheadline)
-        .padding(.horizontal, 16)
         .padding(.vertical, 13)
+    }
+
+    private func columns(waktu: Text, ayam: Text, kondisi: Text) -> some View {
+        HStack(spacing: 0) {
+            waktu.frame(maxWidth: .infinity, alignment: .leading)
+            ayam.frame(maxWidth: .infinity, alignment: .leading)
+            kondisi.frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(.horizontal, columnInset)
     }
 }
 
 
-#Preview {
+#Preview("with rows") {
     @Previewable @State var filter: Freshness?
 
     RecordTable(
@@ -116,4 +119,10 @@ struct RecordTable: View {
     )
     .padding()
     .background(Color.surfaceCream)
+}
+
+#Preview("empty") {
+    RecordTable(records: [])
+        .padding()
+        .background(Color.surfaceCream)
 }
