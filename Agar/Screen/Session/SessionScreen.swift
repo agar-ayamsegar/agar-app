@@ -18,6 +18,10 @@ struct SessionScreen: View {
     @State private var showSessionList = false
     // a scan the grade can't be trusted for, the user has to stab again
     @State private var scanMessage: String?
+    // ripple fill for the hold-to-end button, 0...1
+    @State private var holdProgress: CGFloat = 0
+
+    private let holdDuration: Double = 2
         
     var session: ScanSession
     
@@ -140,17 +144,31 @@ struct SessionScreen: View {
             Task { await bluetoothVM.connect() }
         }
         .bottomAction {
-            Text("Tahan Untuk Akhiri Sesi")
-                .font(.headline)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 18)
-                .glassEffect(.regular, in: .capsule)
-                .contentShape(.capsule)
-                .onLongPressGesture(minimumDuration: 1) {
-                    pageStateVM.setState(.summary(sessionVM.endSession()))
-                }
-                .opacity(sessionVM.canEndSession ? 1 : 0.4)
-                .allowsHitTesting(sessionVM.canEndSession)
+            // no session to end while the machine is still coming up
+            if sessionVM.canEndSession {
+                Text("Tahan Untuk Akhiri Sesi")
+                    .font(.headline)
+                    .foregroundStyle(holdProgress > 0 ? Color.white : Color.primary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 18)
+                    .background {
+                        // red sweeps in from the left over the hold
+                        Rectangle()
+                            .fill(Color.notFreshRed.opacity(0.85))
+                            .scaleEffect(x: holdProgress, anchor: .leading)
+                            .clipShape(.capsule)
+                    }
+                    .glassEffect(.regular, in: .capsule)
+                    .contentShape(.capsule)
+                    .onLongPressGesture(minimumDuration: holdDuration) {
+                        holdProgress = 0
+                        pageStateVM.setState(.summary(sessionVM.endSession()))
+                    } onPressingChanged: { pressing in
+                        withAnimation(pressing ? .linear(duration: holdDuration) : .easeOut(duration: 0.2)) {
+                            holdProgress = pressing ? 1 : 0
+                        }
+                    }
+            }
         }
     }
 }
