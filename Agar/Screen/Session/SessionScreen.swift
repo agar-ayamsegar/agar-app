@@ -139,7 +139,7 @@ struct SessionScreen: View {
             guard phase == .active, !bluetoothVM.isLive else { return }
             Task { await bluetoothVM.connect() }
         }
-        .safeAreaInset(edge: .bottom) {
+        .bottomAction {
             Text("Tahan Untuk Akhiri Sesi")
                 .font(.headline)
                 .frame(maxWidth: .infinity)
@@ -149,7 +149,6 @@ struct SessionScreen: View {
                 .onLongPressGesture(minimumDuration: 1) {
                     pageStateVM.setState(.summary(sessionVM.endSession()))
                 }
-                .padding(.horizontal)
                 .opacity(sessionVM.canEndSession ? 1 : 0.4)
                 .allowsHitTesting(sessionVM.canEndSession)
         }
