@@ -17,9 +17,14 @@ struct GradeSlider: View {
     private let tickWidth: CGFloat = 3
     private let trackHeight: CGFloat = 4
     private let trackY: CGFloat = 14
-    private let knobSize: CGFloat = 30
-    private let pointerTop: CGFloat = 26
+    // big enough to hold the number it stands on, no bigger
+    private let knobSize: CGFloat = 24
+    // starts under the numbers row, so nothing of the ruler is ever covered
+    private let pointerTop: CGFloat = 44
+    private let pointerWidth: CGFloat = 36
     private let areaHeight: CGFloat = 64
+    // numbers sit low enough that the pointer is wide enough to hold one
+    private let numberDrop: CGFloat = 30
 
     private var fraction: CGFloat {
         CGFloat(min(max((score - 1) / 4, 0), 1))
@@ -39,6 +44,12 @@ struct GradeSlider: View {
                         .frame(width: track - tickWidth, height: trackHeight)
                         .position(x: width / 2, y: trackY)
 
+                    // under the ticks: up there it is only a couple of points wide
+                    Pointer()
+                        .fill(.white)
+                        .frame(width: pointerWidth, height: areaHeight - pointerTop + 2)
+                        .position(x: knobX, y: (pointerTop + areaHeight + 2) / 2)
+
                     ForEach(1...5, id: \.self) { step in
                         let x = inset + track * CGFloat(step - 1) / 4
                         let tick: CGFloat = step == 1 || step == 5 ? 14 : 10
@@ -49,18 +60,17 @@ struct GradeSlider: View {
                             .frame(width: tickWidth, height: tick)
                             .position(x: x, y: trackY + tick / 2 - trackHeight / 2)
 
-                        // the number under the dot is covered by the pointer
                         Text("\(step)")
                             .font(.subheadline)
                             .foregroundStyle(.white)
-                            .position(x: x, y: trackY + 26)
-                            .opacity(abs(Double(step) - score) < 0.35 ? 0 : 1)
+                            .position(x: x, y: trackY + numberDrop)
                     }
 
-                    Pointer()
-                        .fill(.white)
-                        .frame(width: 48, height: areaHeight - pointerTop + 2)
-                        .position(x: knobX, y: (pointerTop + areaHeight + 2) / 2)
+                    // the dot cuts a gap in the track so it never looks like it ate a tick
+                    Circle()
+                        .fill(tint)
+                        .frame(width: knobSize + 8, height: knobSize + 8)
+                        .position(x: knobX, y: trackY)
 
                     Circle()
                         .fill(Color.surfaceCream)
