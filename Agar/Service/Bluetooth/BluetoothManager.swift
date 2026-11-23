@@ -28,6 +28,7 @@ protocol IBluetoothManager {
 
     func connect() async throws
     func readCharacteristics(onData: @escaping (String) -> Void) async throws
+    func observeDisconnection(onDisconnect: @escaping () -> Void)
 }
 
 
@@ -40,6 +41,8 @@ class BluetoothManager: IBluetoothManager {
     let characteristicId = CBUUID(string: "3112abef-cfd7-4bb2-b1fc-ab83c5e3f3d6") // value from ESP32
     let scanTimeout = Duration.seconds(15) // how long we look for the esp32 before giving up
     var cancellables = Set<AnyCancellable>()
+    // kept apart from cancellables, which every resubscribe wipes
+    var disconnectCancellables = Set<AnyCancellable>()
 
     // rejecting the passkey drops the link, the peripheral tells us straight away
     var isConnected: Bool { peripheral?.state == .connected }
@@ -105,5 +108,20 @@ class BluetoothManager: IBluetoothManager {
             forCharacteristicWithCBUUID: characteristicId,
             ofServiceWithCBUUID: serviceId
         )
+    }
+
+    // the esp32 can vanish mid session and ios drops the link while we are backgrounded;
+    // nothing reaches the view model unless we listen for it here
+    func observeDisconnection(onDisconnect: @escaping () -> Void) {
+        guard let centralManager = centralManager else { return }
+
+        disconnectCancellables.removeAll()
+
+        centralManager.eventPublisher
+            .sink { event in
+                guard case .didDisconnectPeripheral = event else { return }
+                onDisconnect()
+            }
+            .store(in: &disconnectCancellables)
     }
 }
