@@ -17,6 +17,7 @@ struct SessionScreen: View {
     @State private var showSessionList = false
     // a scan the grade can't be trusted for, the user has to stab again
     @State private var scanMessage: String?
+    @Environment(\.scenePhase) private var scenePhase
     
     var session: ScanSession
     
@@ -135,6 +136,12 @@ struct SessionScreen: View {
             
             await bluetoothVM.connect()
             
+        }
+        // ios can tear the link down while we are backgrounded without the disconnect
+        // event ever landing, so on the way back trust the peripheral over our own flag
+        .onChange(of: scenePhase) { _, phase in
+            guard phase == .active, !bluetoothVM.isLive else { return }
+            Task { await bluetoothVM.connect() }
         }
         .safeAreaInset(edge: .bottom) {
             Text("Tahan Untuk Akhiri Sesi")
