@@ -20,12 +20,11 @@ struct SessionTotalsCard: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .lastTextBaseline, spacing: 8) {
                 Text("\(total)")
-                    .font(.system(size: countSize, weight: .bold))
+                    .font(.system(size: countSize, weight: .black).width(.expanded))
                     .contentTransition(.numericText())
 
                 Text("Ayam")
-                    .font(.title3)
-                    .bold()
+                    .font(.system(size: 20, weight: .black).width(.expanded))
             }
 
             HStack(spacing: 10) {
