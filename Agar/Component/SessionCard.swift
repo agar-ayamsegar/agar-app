@@ -36,6 +36,10 @@ struct SessionCard: View {
             VStack(alignment: .leading, spacing: 12) {
                 Text(session.startedAt, format: .dateTime.day().month(.wide).year())
 
+                // the counts sit at the foot of the card, level with the big number, rather
+                // than riding up under the date and leaving the bottom corner empty
+                Spacer(minLength: 8)
+
                 // a grid, so the colons sit under each other rather than ragging off the
                 // length of the label in front of them
                 Grid(alignment: .leading, horizontalSpacing: 4, verticalSpacing: 2) {
