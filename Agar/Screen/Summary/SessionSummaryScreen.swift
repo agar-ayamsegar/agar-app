@@ -38,10 +38,10 @@ struct SessionSummaryScreen: View {
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.surfaceCream.ignoresSafeArea())
-        .safeAreaInset(edge: .bottom){
+        .bottomAction {
             Button(action: onSave) {
                 Text("Simpan & Lihat Laporan")
-                    .frame(width: 320)
+                    .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
             .buttonBorderShape(.capsule)

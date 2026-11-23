@@ -37,9 +37,7 @@ struct ChickenIllustration: View {
         .accessibilityHidden(true)
     }
 
-    // LottieView calls the loader in onAppear, so this shows for at least one frame every
-    // time, however small the animation is. it has to vanish into the animation rather than
-    // announce itself, so it is the same artwork as a still.
+    
     private var placeholder: some View {
         Image(pose.rawValue)
             .resizable()
