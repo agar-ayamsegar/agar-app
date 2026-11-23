@@ -12,54 +12,58 @@ struct SessionSummaryScreen: View {
     var onSave: () -> Void
 
     var body: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 20) {
             Text("Sesi Selesai")
-                .font(.system(size: 60, weight: .bold))
+                .font(.system(size: 44, weight: .bold))
 
-            ChickenIllustration(pose: .done, height: 220)
+            ChickenIllustration(pose: .done, height: 200)
 
-            HStack(spacing: 15) {
-                Text(session.startedAt, format: .dateTime.day().month(.wide).year()).font(.system(size: 17))
+            HStack(spacing: 12) {
+                Text(session.startedAt, format: .dateTime.day().month(.wide).year())
                 Text("|")
-                Text(session.startedAt, format: .dateTime.hour().minute()).font((.system(size: 17)))
+                Text(session.startedAt, format: .dateTime.hour().minute())
                 Text("|")
-                Text(session.duration, format: .units(allowed: [.hours, .minutes], width: .wide)).font((.system(size: 17)))
+                Text(session.duration, format: .units(allowed: [.hours, .minutes], width: .wide))
             }
-            .font(.title3)
+            .font(.subheadline)
             .foregroundStyle(.secondary)
 
-            HStack(spacing: 30) {
-                stat(title: "Total Ayam diperiksa", value: Text("\(session.totalCount)"))
-                stat(title: "Segar", value: Text("\(session.freshCount)"))
-                stat(title: "Tidak Segar", value: Text("\(session.notFreshCount)"))
-                
+            // a grid, so the three numbers stay on one line even when a label wraps;
+            // as an HStack of VStacks the long label pushed its own total out of line
+            Grid(horizontalSpacing: 12, verticalSpacing: 6) {
+                GridRow {
+                    statLabel("Total")
+                    statLabel("Segar")
+                    statLabel("Tidak Segar")
+                }
+                GridRow {
+                    statValue(session.totalCount)
+                    statValue(session.freshCount)
+                    statValue(session.notFreshCount)
+                }
             }
         }
-        .padding()
+        .padding(.horizontal, 16)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.surfaceCream.ignoresSafeArea())
         .bottomAction {
-            Button(action: onSave) {
-                Text("Simpan & Lihat Laporan")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.borderedProminent)
-            .buttonBorderShape(.capsule)
-            .controlSize(.large)
-            .tint(.actionBlue)
+            Button("Simpan & Lihat Laporan", action: onSave)
+                .buttonStyle(.primaryAction)
         }
     }
 
-    private func stat(title: String, value: Text) -> some View {
-        VStack(spacing: 4) {
-            Text(title)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+    private func statLabel(_ title: String) -> some View {
+        Text(title)
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity)
+    }
 
-            value
-                .font(.title)
-                .bold()
-        }
+    private func statValue(_ value: Int) -> some View {
+        Text("\(value)")
+            .font(.system(size: 28, weight: .bold))
+            .contentTransition(.numericText())
+            .frame(maxWidth: .infinity)
     }
 }
 
