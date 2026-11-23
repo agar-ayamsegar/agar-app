@@ -104,6 +104,9 @@ private extension HomeScreen {
             }
             
             .padding(.horizontal)
+        }
+        .padding(.top, 8)
+        .bottomAction {
             Button(action: onStartScan) {
                 Text("Mulai Scan Ayam")
                     .frame(maxWidth: .infinity)
@@ -112,9 +115,7 @@ private extension HomeScreen {
             .buttonBorderShape(.capsule)
             .controlSize(.large)
             .tint(.actionBlue)
-            .padding()
         }
-        .padding(.top, 8)
         .toolbar(.hidden, for: .navigationBar)
     }
 }
@@ -159,20 +160,19 @@ private extension HomeScreen {
                 
                 sessionList(selected: session)
             }
-           
-
+            .padding()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding()
+        .background(Color.surfaceCream.ignoresSafeArea())
+        .bottomAction {
             Button("Mulai Pemeriksaan", action: onStartScan)
                 .buttonStyle(.borderedProminent)
                 .buttonBorderShape(.capsule)
                 .controlSize(.large)
                 .tint(.actionBlue)
                 .buttonSizing(.flexible)
-    
-            
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding()
-        .background(Color.surfaceCream.ignoresSafeArea())
     }
 
     func sessionList(selected: ScanSession) -> some View {
