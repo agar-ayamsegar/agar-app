@@ -26,9 +26,10 @@ struct HomeScreen: View {
         filteredSessions.first { $0.id == viewModel.selectedSessionID } ?? filteredSessions.first
     }
 
-    var filteredRecords: [ScanRecord] {
-        guard let records = selectedSession?.records else { return [] }
-        let ordered = records.sorted { $0.scannedAt < $1.scannedAt }
+    // takes the session it is given: this used to read selectedSession, so opening any card
+    // showed the first session's rows rather than the one that was tapped
+    func records(for session: ScanSession) -> [ScanRecord] {
+        let ordered = session.records.sorted { $0.scannedAt < $1.scannedAt }
         guard let filter = viewModel.recordFilter else { return ordered }
         return ordered.filter { $0.freshness == filter }
     }
@@ -82,16 +83,20 @@ private extension HomeScreen {
 
 // MARK: - empty state: no session on the picked day
 private extension HomeScreen {
+    var header: some View {
+        HStack(alignment: .center) {
+            Text("Rekap Sesi")
+                .font(.largeTitle.bold())
+
+            Spacer()
+
+            datePicker
+        }
+    }
+
     var emptyState: some View {
         VStack(spacing: 16) {
-            HStack(alignment: .center) {
-                Text("Rekap Sesi")
-                    .font(.largeTitle.bold())
-                Spacer()
-                    datePicker
-
-            }
-            .padding(.horizontal)
+            header
 
             DetailPanel {
                 ContentUnavailableView {
@@ -102,19 +107,14 @@ private extension HomeScreen {
                         .foregroundStyle(.secondary)
                 }
             }
-            
-            .padding(.horizontal)
         }
+        .padding(.horizontal, 16)
         .padding(.top, 8)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.surfaceCream.ignoresSafeArea())
         .bottomAction {
-            Button(action: onStartScan) {
-                Text("Mulai Scan Ayam")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.borderedProminent)
-            .buttonBorderShape(.capsule)
-            .controlSize(.large)
-            .tint(.actionBlue)
+            Button("Mulai Scan Ayam", action: onStartScan)
+                .buttonStyle(.primaryAction)
         }
         .toolbar(.hidden, for: .navigationBar)
     }
@@ -143,67 +143,52 @@ private struct DetailBackButton: View {
 // MARK: - recap: session list + selected session detail
 private extension HomeScreen {
     func recap(_ session: ScanSession) -> some View {
-        
         VStack(spacing: 16) {
-            HStack {
-                Text("Rekap Sesi")
-                    .font(.largeTitle)
-                    .bold()
+            // the list runs full width so its scroll bar rides the screen edge, so only the
+            // header is inset here; everything else keeps the same 16
+            header
+                .padding(.horizontal, 16)
 
-                Spacer()
-
-                datePicker
-
-               
-            }
-            HStack(alignment: .top, spacing: 12) {
-                
-                sessionList(selected: session)
-            }
-            .padding()
+            sessionList(selected: session)
         }
+        .padding(.top, 8)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding()
         .background(Color.surfaceCream.ignoresSafeArea())
         .bottomAction {
             Button("Mulai Pemeriksaan", action: onStartScan)
-                .buttonStyle(.borderedProminent)
-                .buttonBorderShape(.capsule)
-                .controlSize(.large)
-                .tint(.actionBlue)
-                .buttonSizing(.flexible)
+                .buttonStyle(.primaryAction)
         }
+        .toolbar(.hidden, for: .navigationBar)
     }
 
     func sessionList(selected: ScanSession) -> some View {
-        ScrollView {
-            LazyVStack(spacing: 4) {
-                ForEach(filteredSessions) { session in
-                    NavigationLink {
-                        sessionDetail(session)
-                    } label: {
-                        SessionCard(session: session, isSelected: session.id == selected.id)    
+        ZStack(alignment: .top) {
+            // the panel sits behind and does not scroll, so the indicator lands on the
+            // screen edge rather than inside the white card
+            RoundedRectangle(cornerRadius: 24)
+                .fill(.white)
+                .padding(.horizontal, 16)
+
+            ScrollView {
+                LazyVStack(spacing: 10) {
+                    ForEach(filteredSessions) { session in
+                        NavigationLink {
+                            sessionDetail(session)
+                        } label: {
+                            SessionCard(session: session, isSelected: session.id == selected.id)
+                        }
+                        .buttonStyle(.plain)
                     }
-                 
-                    .buttonStyle(.plain)
-                    
                 }
-                .overlay(
-                        RoundedRectangle(cornerRadius: 24, style: .continuous)
-                            .stroke(Color.cardGray, lineWidth: 2)
-                )
-                .padding(5)
+                .padding(.horizontal, 28)
+                .padding(.vertical, 14)
             }
-            .padding(8)
-            
         }
-        .frame(maxHeight: .infinity)
-        .background(.white, in: .rect(cornerRadius: 24))
-        
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     func sessionDetail(_ session: ScanSession) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 12) {
                 DetailBackButton()
 
@@ -218,96 +203,24 @@ private extension HomeScreen {
                 }
             }
 
-            VStack(alignment: .leading, spacing: 4) {
-                
-                VStack(alignment: .leading, spacing: 4){
-                    HStack(alignment: .lastTextBaseline) {
-                        Text("\(session.totalCount)")
-                            .font(.system(size: 72, weight: .bold))
-                        Text("Ayam")
-                            .font(.title3)
-                            .bold()
-                        
-                        
-                    }
-                    HStack{
-                        StatCard(freshness: .fresh, value: session.freshCount)
-                        StatCard(freshness: .notFresh, value: session.notFreshCount)
-                    }
-                }
-                .padding(8)
-                .background(RoundedRectangle(cornerRadius: 24)
-                    .fill(Color(.white)))
-                .frame(maxWidth: 520)
-            }
+            SessionTotalsCard(session: session)
 
-            recordTable
+            RecordTable(
+                records: records(for: session),
+                filter: $viewModel.recordFilter,
+                onInfo: { showsReference = true }
+            )
+            .popover(isPresented: $showsReference) {
+                referencePopover
+                    .presentationCompactAdaptation(.popover)
+            }
         }
-        .padding(20)
+        .padding(.horizontal, 16)
+        .padding(.top, 4)
+        .padding(.bottom, 16)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .background(.surfaceCream)
+        .background(Color.surfaceCream.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
-    }
-
-
-    var recordTable: some View {
-        VStack(spacing: 8) {
-            ZStack {
-                Picker("Filter", selection: $viewModel.recordFilter) {
-                    Text("Semua").tag(Freshness?.none)
-                    ForEach(Freshness.allCases, id: \.self) { freshness in
-                        Text(freshness.title).tag(Optional(freshness))
-                    }
-                }
-                .pickerStyle(.segmented)
-                .frame(width: 320)
-
-                Button {
-                    showsReference = true
-                } label: {
-                    Image(systemName: "info.circle")
-                }
-                .frame(maxWidth: .infinity, alignment: .trailing)
-                .popover(isPresented: $showsReference) {
-                    referencePopover
-                        .presentationCompactAdaptation(.popover)
-                }
-            }
-
-            HStack {
-                Text("Waktu").frame(maxWidth: .infinity, alignment: .leading)
-                Text("Ayam").frame(maxWidth: .infinity, alignment: .leading)
-                Text("Kondisi").frame(maxWidth: .infinity, alignment: .leading)
-            }
-            .font(.subheadline.weight(.semibold))
-            .foregroundStyle(.secondary)
-            .padding(.horizontal, 16)
-            .padding(.top, 4)
-
-            ScrollView {
-                LazyVStack(spacing: 0) {
-                    ForEach(filteredRecords) { record in
-                        HStack {
-                            Text(record.scannedAt, format: .dateTime.hour().minute().second())
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                            Text("#\(record.chickenNumber)")
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                            Text(record.freshness.title)
-                                .foregroundStyle(record.freshness.tint)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 14)
-
-                        Divider()
-                            .padding(.leading, 16)
-                    }
-                }
-            }
-            .background(.white, in: .rect(cornerRadius: 12))
-        }
-        .padding(12)
-        .background(Color.cardGray, in: .rect(cornerRadius: 16))
     }
 
     func columnTitle(_ title: String) -> Text {
