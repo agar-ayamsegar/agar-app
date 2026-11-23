@@ -23,8 +23,11 @@ class SessionViewModel {
         self.machineState = machineState
     }
 
-    // session can only be ended once the machine is connected
+    // session can only be ended once the machine is connected, but one that already has
+    // chickens in it stays savable even if the machine drops out mid session
     var canEndSession: Bool {
+        guard session.records.isEmpty else { return true }
+
         switch machineState {
         case .preparing, .connectionFailed:
             return false

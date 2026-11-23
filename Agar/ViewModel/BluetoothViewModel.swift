@@ -36,14 +36,34 @@ class BluetoothViewModel<T: Decodable> {
 
     // the pairing passkey is typed by hand, give the operator room
     private let pairingTimeout = 30
+    // connect() drops the old peripheral on purpose, that disconnect is not a failure
+    private var isConnecting = false
     
     init(bluetoothManager: IBluetoothManager = BluetoothManager()) {
         self.bluetoothManager = bluetoothManager
+        bluetoothManager.observeDisconnection { [weak self] in
+            self?.dropped()
+        }
+    }
+
+    // the live link, not the last thing we told the ui: state goes stale across a
+    // background, the peripheral never does
+    var isLive: Bool { bluetoothManager?.isConnected == true }
+
+    // the machine went away, say so instead of leaving the panel on "siap"
+    private func dropped() {
+        guard !isConnecting else { return }
+
+        characteristics.removeAll()
+        state = .error(BluetoothError.machineNotFound.localizedDescription)
     }
     
     
     // connecting to service and running the subscribe message
     func connect() async {
+        isConnecting = true
+        defer { isConnecting = false }
+
         characteristics.removeAll()
         state = .scanning
         do {
