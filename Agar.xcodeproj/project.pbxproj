@@ -7,14 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C825F72330B42F58008EABA0 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = C825F72230B42F58008EABA0 /* AppIcon.icon */; };
 		C86F21EB3091D2D1000ABBEE /* AsyncBluetooth in Frameworks */ = {isa = PBXBuildFile; productRef = C86F21EA3091D2D1000ABBEE /* AsyncBluetooth */; };
-		FD2FA09E3099E17E003AE4FE /* MLX in Frameworks */ = {isa = PBXBuildFile; productRef = FD2FA09D3099E17E003AE4FE /* MLX */; };
-		FD2FA0A03099E17E003AE4FE /* MLXFast in Frameworks */ = {isa = PBXBuildFile; productRef = FD2FA09F3099E17E003AE4FE /* MLXFast */; };
-		FD2FA0A23099E17E003AE4FE /* MLXFFT in Frameworks */ = {isa = PBXBuildFile; productRef = FD2FA0A13099E17E003AE4FE /* MLXFFT */; };
-		FD2FA0A43099E17E003AE4FE /* MLXLinalg in Frameworks */ = {isa = PBXBuildFile; productRef = FD2FA0A33099E17E003AE4FE /* MLXLinalg */; };
-		FD2FA0A63099E17E003AE4FE /* MLXNN in Frameworks */ = {isa = PBXBuildFile; productRef = FD2FA0A53099E17E003AE4FE /* MLXNN */; };
-		FD2FA0A83099E17E003AE4FE /* MLXOptimizers in Frameworks */ = {isa = PBXBuildFile; productRef = FD2FA0A73099E17E003AE4FE /* MLXOptimizers */; };
-		FD2FA0AA3099E17E003AE4FE /* MLXRandom in Frameworks */ = {isa = PBXBuildFile; productRef = FD2FA0A93099E17E003AE4FE /* MLXRandom */; };
 		FD2FA2E430A579D3003AE4FE /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = FD2FA2E330A579D3003AE4FE /* Lottie */; };
 /* End PBXBuildFile section */
 
@@ -47,6 +41,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		C825F72230B42F58008EABA0 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		C8381981308CED85005A3D92 /* Agar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Agar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C838198E308CED86005A3D92 /* AgarTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AgarTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C8381998308CED86005A3D92 /* AgarUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AgarUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -87,15 +82,8 @@
 		C838197E308CED85005A3D92 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
-				FD2FA0A63099E17E003AE4FE /* MLXNN in Frameworks */,
-				FD2FA0A43099E17E003AE4FE /* MLXLinalg in Frameworks */,
 				FD2FA2E430A579D3003AE4FE /* Lottie in Frameworks */,
-				FD2FA0A03099E17E003AE4FE /* MLXFast in Frameworks */,
-				FD2FA0AA3099E17E003AE4FE /* MLXRandom in Frameworks */,
-				FD2FA09E3099E17E003AE4FE /* MLX in Frameworks */,
-				FD2FA0A83099E17E003AE4FE /* MLXOptimizers in Frameworks */,
 				C86F21EB3091D2D1000ABBEE /* AsyncBluetooth in Frameworks */,
-				FD2FA0A23099E17E003AE4FE /* MLXFFT in Frameworks */,
 			);
 		};
 		C838198B308CED86005A3D92 /* Frameworks */ = {
@@ -114,6 +102,7 @@
 		C8381978308CED85005A3D92 = {
 			isa = PBXGroup;
 			children = (
+				C825F72230B42F58008EABA0 /* AppIcon.icon */,
 				C8381983308CED85005A3D92 /* Agar */,
 				C8381991308CED86005A3D92 /* AgarTests */,
 				C838199B308CED86005A3D92 /* AgarUITests */,
@@ -159,13 +148,6 @@
 			name = Agar;
 			packageProductDependencies = (
 				C86F21EA3091D2D1000ABBEE /* AsyncBluetooth */,
-				FD2FA09D3099E17E003AE4FE /* MLX */,
-				FD2FA09F3099E17E003AE4FE /* MLXFast */,
-				FD2FA0A13099E17E003AE4FE /* MLXFFT */,
-				FD2FA0A33099E17E003AE4FE /* MLXLinalg */,
-				FD2FA0A53099E17E003AE4FE /* MLXNN */,
-				FD2FA0A73099E17E003AE4FE /* MLXOptimizers */,
-				FD2FA0A93099E17E003AE4FE /* MLXRandom */,
 				FD2FA2E330A579D3003AE4FE /* Lottie */,
 			);
 			productName = Agar;
@@ -267,6 +249,7 @@
 		C838197F308CED85005A3D92 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
+				C825F72330B42F58008EABA0 /* AppIcon.icon in Resources */,
 			);
 		};
 		C838198C308CED86005A3D92 /* Resources */ = {
@@ -669,41 +652,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = C86F21E93091D2D1000ABBEE /* XCRemoteSwiftPackageReference "AsyncBluetooth" */;
 			productName = AsyncBluetooth;
-		};
-		FD2FA09D3099E17E003AE4FE /* MLX */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = FD777B253092005F00ACB317 /* XCRemoteSwiftPackageReference "mlx-swift" */;
-			productName = MLX;
-		};
-		FD2FA09F3099E17E003AE4FE /* MLXFast */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = FD777B253092005F00ACB317 /* XCRemoteSwiftPackageReference "mlx-swift" */;
-			productName = MLXFast;
-		};
-		FD2FA0A13099E17E003AE4FE /* MLXFFT */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = FD777B253092005F00ACB317 /* XCRemoteSwiftPackageReference "mlx-swift" */;
-			productName = MLXFFT;
-		};
-		FD2FA0A33099E17E003AE4FE /* MLXLinalg */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = FD777B253092005F00ACB317 /* XCRemoteSwiftPackageReference "mlx-swift" */;
-			productName = MLXLinalg;
-		};
-		FD2FA0A53099E17E003AE4FE /* MLXNN */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = FD777B253092005F00ACB317 /* XCRemoteSwiftPackageReference "mlx-swift" */;
-			productName = MLXNN;
-		};
-		FD2FA0A73099E17E003AE4FE /* MLXOptimizers */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = FD777B253092005F00ACB317 /* XCRemoteSwiftPackageReference "mlx-swift" */;
-			productName = MLXOptimizers;
-		};
-		FD2FA0A93099E17E003AE4FE /* MLXRandom */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = FD777B253092005F00ACB317 /* XCRemoteSwiftPackageReference "mlx-swift" */;
-			productName = MLXRandom;
 		};
 		FD2FA2E330A579D3003AE4FE /* Lottie */ = {
 			isa = XCSwiftPackageProductDependency;

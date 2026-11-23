@@ -54,7 +54,7 @@ enum FakeChicken: String, CaseIterable, Identifiable {
             return Fake.rows(count: 60, mq137: 800, mq135: 1156,
                              rs137: Fake.airRs137 * 0.50, rs135: Fake.airRs135 * 0.45, wobble: 9)
         case .looseGround:
-            return Fake.rows(count: 60, mq137: 956, mq135: FreshnessModel.adcMax,
+            return Fake.rows(count: 60, mq137: 956, mq135: Fake.airRs135,
                              rs137: Fake.airRs137 * 0.30, rs135: 0.01)
         case .tooShort:
             return Fake.rows(count: 3, mq137: 956, mq135: 2590,
