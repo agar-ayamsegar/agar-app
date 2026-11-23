@@ -8,11 +8,13 @@
 import SwiftUI
 import SwiftData
 
+
+
 struct MainScreen: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \ScanSession.number, order: .reverse) private var sessionsByNumber: [ScanSession]
     @State var pageStateVM: PageStateViewModel = PageStateViewModel()
-    @State var bluetoothVM: BluetoothViewModel<ElectrodeSensor> = BluetoothViewModel()
+    @State var bluetoothVM: BluetoothViewModel<ElectrodeSensor> = BluetoothViewModel(bluetoothManager: Fake.machine)
     @State var freshnessVM: FreshnessViewModel = FreshnessViewModel()
     @State var recapVM: RecapViewModel = RecapViewModel()
 
@@ -44,6 +46,9 @@ struct MainScreen: View {
             .preferredColorScheme(.light)
             .environment(\.locale, Locale(identifier: "id_ID"))
             .containerBackground(.surfaceCream, for: .navigation)
+            .task {
+                Fake.seedSessions(into: modelContext)
+            }
         }
     }
 }
