@@ -32,45 +32,18 @@ struct SessionScreen: View {
     
     var riwayatSheet: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 16) {
-                HStack(alignment: .lastTextBaseline) {
-                    Text("\(sessionVM.session.totalCount)")
-                        .font(.system(size: 56, weight: .bold))
-                        .contentTransition(.numericText())
-                    Text("Ayam")
-                        .font(.title3)
-                        .bold()
-                }
+            VStack(alignment: .leading, spacing: 14) {
+                SessionTotalsCard(session: sessionVM.session, countSize: 56)
 
-                HStack(spacing: 8) {
-                    StatCard(freshness: .fresh, value: sessionVM.session.freshCount)
-                    StatCard(freshness: .notFresh, value: sessionVM.session.notFreshCount)
-                }
-
-                VStack(spacing: 0) {
-                    HStack {
-                        Text("Waktu").frame(maxWidth: .infinity, alignment: .leading)
-                        Text("Ayam").frame(maxWidth: .infinity, alignment: .leading)
-                        Text("Kondisi").frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
-
-                    ScrollView {
-                        LazyVStack(spacing: 0) {
-                            ForEach(sessionVM.session.records.sorted { $0.scannedAt > $1.scannedAt }) { record in
-                                historyRow(record)
-                                Divider()
-                            }
-                        }
-                    }
-                    .background(.white, in: .rect(cornerRadius: 12))
-                }
+                // newest scan on top, the way the mock reads. sorted rather than reversed:
+                // swiftdata does not promise an order for a to-many relationship, so
+                // reversing it only reversed whatever order the store happened to hand back
+                RecordTable(records: sessionVM.session.records.sorted { $0.scannedAt > $1.scannedAt })
             }
             .animation(.default, value: sessionVM.session.totalCount)
-            .padding(20)
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+            .padding(.bottom, 16)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .background(Color.surfaceCream)
             .navigationTitle("Riwayat Pemeriksaan")

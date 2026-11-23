@@ -114,7 +114,9 @@ extension SessionScreen {
         }
         .buttonStyle(.borderedProminent)
         .buttonBorderShape(.capsule)
-        .tint(.actionBlue)
+        // the pair sit side by side, so they keep the plain shape, but the blue matches
+        // the primary button rather than staying on the old lighter one
+        .tint(.actionBlueDeep)
     }
 
     var ready: some View {
