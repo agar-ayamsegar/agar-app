@@ -37,20 +37,13 @@ struct ChickenIllustration: View {
         .accessibilityHidden(true)
     }
 
+    // LottieView calls the loader in onAppear, so this shows for at least one frame every
+    // time, however small the animation is. it has to vanish into the animation rather than
+    // announce itself, so it is the same artwork as a still.
     private var placeholder: some View {
-        RoundedRectangle(cornerRadius: 16)
-            .strokeBorder(style: StrokeStyle(lineWidth: 2, dash: [8]))
-            .aspectRatio(1, contentMode: .fit)
-            .overlay {
-                VStack(spacing: 8) {
-                    Image(systemName: "bird")
-                        .font(.system(size: 48))
-
-                    Text(pose.rawValue)
-                        .font(.caption.monospaced())
-                }
-            }
-            .foregroundStyle(.secondary)
+        Image(pose.rawValue)
+            .resizable()
+            .scaledToFit()
     }
 }
 
