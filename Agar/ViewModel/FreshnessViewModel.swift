@@ -78,11 +78,14 @@ class FreshnessViewModel {
     static var rowsPerScan: Int { settleSeconds + sampleCount }
 
     // MARK: - state
-    private(set) var state: FreshnessState = .idle
+    private(set) var state: FreshnessState = .scanned(.fresh)
     private(set) var ohm: Float?
     private(set) var grade: FreshnessGrade?
     // 1.0 to 4.5 in half steps, for the slider
     private(set) var score: Double?
+    
+    // MARK: - service
+    let audioManager = AudioManager()
 
     // the median ignores a reading that jumps when a pin moves, the average would not,
     // and the thresholds were calculated on the median
@@ -104,9 +107,10 @@ class FreshnessViewModel {
             print("[scan] median \(ohm) ohm -> too high, retry")
             return
         }
-
+        
         let grade = Self.grade(for: ohm)
         self.grade = grade
+        Task.detached { await self.audioManager.playSound(grade.number < 3 ? "NotFresh" : "Fresh") }
         score = Self.score(for: ohm)
         state = .scanned(grade.freshness)
         print("[scan] median \(ohm) ohm -> grade \(grade.number) \(grade.freshness)")
