@@ -92,6 +92,15 @@ class SessionViewModel {
         waitingForRemoval = true
     }
 
+    // the verdict is disputed, drop it so the same chicken gets its number back on the next stab
+    func rescanLast() {
+        guard case .result = machineState, !session.records.isEmpty else { return }
+        session.records.removeLast()
+        stabRows.removeAll()
+        // the chicken still has to come off the probe before it can be stabbed again
+        machineState = session.records.isEmpty ? .ready : .nextChicken
+    }
+
     func endSession() -> ScanSession {
         session.endedAt = .now
         return session
