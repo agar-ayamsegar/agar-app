@@ -12,13 +12,13 @@ struct SessionScreen: View {
     @Environment(FreshnessViewModel.self) var freshnessVM
     @Environment(PageStateViewModel.self) var pageStateVM
     @Environment(RecapViewModel.self) var recapVM
-    
+    @Environment(\.scenePhase) private var scenePhase
+
     @State var sessionVM: SessionViewModel
     @State private var showSessionList = false
     // a scan the grade can't be trusted for, the user has to stab again
     @State private var scanMessage: String?
-    @Environment(\.scenePhase) private var scenePhase
-    
+        
     var session: ScanSession
     
     init(session: ScanSession) {
@@ -133,12 +133,8 @@ struct SessionScreen: View {
             Text(scanMessage ?? "")
         }
         .task {
-            
             await bluetoothVM.connect()
-            
         }
-        // ios can tear the link down while we are backgrounded without the disconnect
-        // event ever landing, so on the way back trust the peripheral over our own flag
         .onChange(of: scenePhase) { _, phase in
             guard phase == .active, !bluetoothVM.isLive else { return }
             Task { await bluetoothVM.connect() }
