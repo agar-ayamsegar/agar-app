@@ -161,11 +161,26 @@ extension SessionScreen {
             // smaller with the slider so the bubble text always fits on an iPhone
             ChickenIllustration(pose: freshness.pose, height: freshnessVM.grade == nil ? 440 : 240)
 
-            if let instruction = freshness.instruction {
+            // the grade knows better than the two-way freshness; fall back when there is none
+            if let instruction = freshnessVM.grade.map(\.instruction) ?? freshness.instruction {
                 Text(instruction)
                     .font(.title3)
                     .bold()
             }
+
+            Button {
+                sessionVM.rescanLast()
+            } label: {
+                Text("Coba Lagi")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .buttonBorderShape(.capsule)
+            .controlSize(.large)
+            .tint(.white)
+            .foregroundStyle(freshness.tint)
+            // long, but inset so it sits under the instruction rather than edge to edge
+            .padding(.horizontal, 24)
         }
         .foregroundStyle(.white)
     }
