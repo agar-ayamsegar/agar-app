@@ -10,30 +10,21 @@ import SwiftUI
 /// Deeper than the flat ActionBlue it replaces, with a little gradient and a shadow so it
 /// lifts off the cream the way the sketch has it. Every screen goes through this, so the
 /// four of them cannot drift apart again the way their spacing once did.
-struct PrimaryActionButtonStyle: ButtonStyle {
+struct PrimaryActionButtonStyle: PrimitiveButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(.headline)
-            .foregroundStyle(.white)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 17)
-            .background(
-                LinearGradient(
-                    colors: [.actionBlueDeep.mix(with: .white, by: 0.16), .actionBlueDeep],
-                    startPoint: .top,
-                    endPoint: .bottom
-                ),
-                in: .capsule
-            )
-            // sits under the capsule rather than around it, so it reads as height not a glow
-            .shadow(color: .actionBlueDeep.opacity(0.30), radius: 10, y: 5)
-            .opacity(configuration.isPressed ? 0.9 : 1)
-            .scaleEffect(configuration.isPressed ? 0.985 : 1)
-            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
+        Button(role: configuration.role, action: configuration.trigger) {
+            configuration.label
+                .font(.headline)
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.glassProminent)
+        .buttonBorderShape(.capsule)
+        .controlSize(.extraLarge)
+        .tint(.actionBlueDeep)
     }
 }
 
-extension ButtonStyle where Self == PrimaryActionButtonStyle {
+extension PrimitiveButtonStyle where Self == PrimaryActionButtonStyle {
     static var primaryAction: PrimaryActionButtonStyle { .init() }
 }
 
