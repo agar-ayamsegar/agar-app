@@ -16,7 +16,6 @@ struct HomeScreen: View {
     var onStartScan: () -> Void
     @State private var bidingstatus = false
 
-    @State private var showsReference = false
     @State private var showsDatePicker = false
     var filteredSessions: [ScanSession] {
         sessions.filter { Calendar.current.isDate($0.startedAt, inSameDayAs: viewModel.selectedDate) }
@@ -207,13 +206,8 @@ private extension HomeScreen {
 
             RecordTable(
                 records: records(for: session),
-                filter: $viewModel.recordFilter,
-                onInfo: { showsReference = true }
+                filter: $viewModel.recordFilter
             )
-            .popover(isPresented: $showsReference) {
-                referencePopover
-                    .presentationCompactAdaptation(.popover)
-            }
         }
         .padding(.horizontal, 16)
         .padding(.top, 4)
@@ -225,28 +219,6 @@ private extension HomeScreen {
 
     func columnTitle(_ title: String) -> Text {
         Text(title).foregroundStyle(.secondary)
-    }
-
-    var referencePopover: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            ForEach(Freshness.allCases, id: \.self) { freshness in
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(freshness.title)
-                        .foregroundStyle(freshness.tint)
-
-                    Grid(alignment: .leading, verticalSpacing: 2) {
-                        ForEach(freshness.referenceRanges, id: \.label) { reference in
-                            GridRow {
-                                Text(reference.label)
-                                Text(":  \(reference.range)")
-                            }
-                            .foregroundStyle(.secondary)
-                        }
-                    }
-                }
-            }
-        }
-        .padding(24)
     }
 }
 
