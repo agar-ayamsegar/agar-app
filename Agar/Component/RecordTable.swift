@@ -15,7 +15,6 @@ import SwiftUI
 struct RecordTable: View {
     let records: [ScanRecord]
     var filter: Binding<Freshness?>?
-    var onInfo: (() -> Void)?
 
     /// Keeps the column titles lined up under the segmented control above them rather than
     /// sitting further in than it.
@@ -24,23 +23,13 @@ struct RecordTable: View {
     var body: some View {
         VStack(spacing: 10) {
             if let filter {
-                HStack(spacing: 10) {
-                    Picker("Filter", selection: filter) {
-                        Text("Semua").tag(Freshness?.none)
-                        ForEach(Freshness.allCases, id: \.self) { freshness in
-                            Text(freshness.title).tag(Optional(freshness))
-                        }
-                    }
-                    .pickerStyle(.segmented)
-
-                    if let onInfo {
-                        Button(action: onInfo) {
-                            Image(systemName: "info.circle")
-                        }
-                        .buttonStyle(.plain)
-                        .foregroundStyle(.tint)
+                Picker("Filter", selection: filter) {
+                    Text("Semua").tag(Freshness?.none)
+                    ForEach(Freshness.allCases, id: \.self) { freshness in
+                        Text(freshness.title).tag(Optional(freshness))
                     }
                 }
+                .pickerStyle(.segmented)
             }
 
             VStack(spacing: 0) {
@@ -114,8 +103,7 @@ struct RecordTable: View {
             ScanRecord(chickenNumber: $0, scannedAt: .now.addingTimeInterval(Double($0) * 18),
                        freshness: $0.isMultiple(of: 4) ? .notFresh : .fresh)
         },
-        filter: $filter,
-        onInfo: {}
+        filter: $filter
     )
     .padding()
     .background(Color.surfaceCream)
