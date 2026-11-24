@@ -59,7 +59,7 @@ extension SessionScreen {
                 Text("Coba Lagi")
                     .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(.glassProminent)
             .buttonBorderShape(.capsule)
             .controlSize(.large)
             .tint(.white)
@@ -142,7 +142,7 @@ extension SessionScreen {
                 pageStateVM.setState(.home)
             }
         }
-        .buttonStyle(.borderedProminent)
+        .buttonStyle(.glassProminent)
         .buttonBorderShape(.capsule)
         // same control size as the result action, so the two slots are the same height
         .controlSize(.large)
