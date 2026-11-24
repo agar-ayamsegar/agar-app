@@ -230,7 +230,6 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				C86F21E93091D2D1000ABBEE /* XCRemoteSwiftPackageReference "AsyncBluetooth" */,
-				FD777B253092005F00ACB317 /* XCRemoteSwiftPackageReference "mlx-swift" */,
 				FD2FA2E230A579C7003AE4FE /* XCRemoteSwiftPackageReference "lottie-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -635,14 +634,6 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 4.6.1;
-			};
-		};
-		FD777B253092005F00ACB317 /* XCRemoteSwiftPackageReference "mlx-swift" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/ml-explore/mlx-swift.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.33.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

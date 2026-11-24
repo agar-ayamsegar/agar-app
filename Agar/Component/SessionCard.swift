@@ -9,7 +9,6 @@ import SwiftUI
 
 struct SessionCard: View {
     let session: ScanSession
-    var isSelected: Bool = false
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -59,11 +58,10 @@ struct SessionCard: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
-        .background(isSelected ? Color.cardGray : .white, in: .rect(cornerRadius: 18))
-        // the selected card is filled, so a border on top of the fill only muddies it
+        .background(.white, in: .rect(cornerRadius: 18))
         .overlay {
             RoundedRectangle(cornerRadius: 18)
-                .strokeBorder(Color.cardGray, lineWidth: isSelected ? 0 : 1.5)
+                .strokeBorder(Color.cardGray, lineWidth: 1.5)
         }
         .contentShape(.rect)
     }
@@ -77,7 +75,7 @@ struct SessionCard: View {
         }))
         SessionCard(session: ScanSession(number: 135, records: (1...130).map {
             ScanRecord(chickenNumber: $0, freshness: $0 > 128 ? .notFresh : .fresh)
-        }), isSelected: true)
+        }))
     }
     .padding()
     .background(Color.surfaceCream)

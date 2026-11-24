@@ -61,7 +61,7 @@ private extension HomeScreen {
                 Image(systemName: "calendar")
             }
         }
-        .buttonStyle(.bordered)
+        .buttonStyle(.glass)
         .buttonBorderShape(.capsule)
         .controlSize(.large)
         .tint(.primary)
@@ -175,7 +175,7 @@ private extension HomeScreen {
                         NavigationLink {
                             sessionDetail(session)
                         } label: {
-                            SessionCard(session: session, isSelected: session.id == selected.id)
+                            SessionCard(session: session)
                         }
                         .buttonStyle(.plain)
                     }
