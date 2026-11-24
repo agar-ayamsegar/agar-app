@@ -20,6 +20,9 @@ struct SessionScreen: View {
     @State private var scanMessage: String?
     // ripple fill for the hold-to-end button, 0...1
     @State private var holdProgress: CGFloat = 0
+    @State private var isHolding = false
+    @State private var holdTick = 0
+    @State private var holdEnded = false
 
     private let holdDuration: Double = 2
         
@@ -128,29 +131,56 @@ struct SessionScreen: View {
             // untouchable rather than absent: dropping it outright let the panel above grow
             // into the gap, which moved the action sitting at the foot of that panel
             Group {
-                Text("Tahan Untuk Akhiri Sesi")
+                Text(isHolding || holdEnded ? "Terus Tahan…" : "Tahan Untuk Akhiri Sesi")
                     .font(.headline)
                     .foregroundStyle(holdProgress > 0 ? Color.white : Color.primary)
+                    .contentTransition(.opacity)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 18)
+                    .glassEffect(.regular.interactive(), in: .capsule)
                     .background {
                         // red sweeps in from the left over the hold
                         Rectangle()
-                            .fill(Color.notFreshRed.opacity(0.85))
+                            .fill(Color.notFreshRed)
                             .scaleEffect(x: holdProgress, anchor: .leading)
                             .clipShape(.capsule)
                     }
-                    .glassEffect(.regular, in: .capsule)
                     .contentShape(.capsule)
+                    .scaleEffect(isHolding ? 0.96 : 1)
+                    .animation(.spring(duration: 0.25), value: isHolding)
                     .onLongPressGesture(minimumDuration: holdDuration) {
-                        holdProgress = 0
-                        pageStateVM.setState(.summary(sessionVM.endSession()))
+                        holdEnded = true
+                        holdProgress = 1
+                        isHolding = false
+                        holdTick = 0
+                        Task {
+                            try? await Task.sleep(for: .milliseconds(250))
+                            pageStateVM.setState(.summary(sessionVM.endSession()))
+                            holdEnded = false
+                            holdProgress = 0
+                        }
                     } onPressingChanged: { pressing in
+                        guard !holdEnded else { return }
+                        isHolding = pressing
+                        if !pressing { holdTick = 0 }
                         withAnimation(pressing ? .linear(duration: holdDuration) : .easeOut(duration: 0.2)) {
                             holdProgress = pressing ? 1 : 0
                         }
                     }
             }
+            .task(id: isHolding) {
+                guard isHolding else { return }
+                while !Task.isCancelled {
+                    try? await Task.sleep(for: .milliseconds(250))
+                    guard !Task.isCancelled, isHolding else { return }
+                    holdTick += 1
+                }
+            }
+            .sensoryFeedback(.impact(weight: .light), trigger: isHolding) { _, holding in holding }
+            .sensoryFeedback(trigger: holdTick) { _, tick in
+                tick > 0 ? .impact(flexibility: .solid, intensity: min(1, 0.3 + Double(tick) * 0.09)) : nil
+            }
+            .sensoryFeedback(.success, trigger: holdEnded) { _, ended in ended }
             .opacity(sessionVM.canEndSession ? 1 : 0)
             .allowsHitTesting(sessionVM.canEndSession)
         }
@@ -160,7 +190,7 @@ struct SessionScreen: View {
 
 #Preview("Preparing") {
     SessionScreen(session: ScanSession(number: 1))
-    .environment(BluetoothViewModel<ElectrodeSensor>())
+    .environment(BluetoothViewModel<ElectrodeSensor>(bluetoothManager: FakeBluetoothManager()))
     .environment(FreshnessViewModel())
     .environment(PageStateViewModel())
     .environment(RecapViewModel())
@@ -168,7 +198,7 @@ struct SessionScreen: View {
 
 #Preview("Ready") {
     SessionScreen(session: ScanSession(number: 1))
-    .environment(BluetoothViewModel<ElectrodeSensor>())
+    .environment(BluetoothViewModel<ElectrodeSensor>(bluetoothManager: FakeBluetoothManager()))
     .environment(FreshnessViewModel())
     .environment(PageStateViewModel())
     .environment(RecapViewModel())
@@ -179,7 +209,7 @@ struct SessionScreen: View {
         ScanRecord(chickenNumber: $0, freshness: $0.isMultiple(of: 30) ? .notFresh : .fresh)
     })
     SessionScreen(session: session)
-    .environment(BluetoothViewModel<ElectrodeSensor>())
+    .environment(BluetoothViewModel<ElectrodeSensor>(bluetoothManager: FakeBluetoothManager()))
     .environment(FreshnessViewModel())
     .environment(PageStateViewModel())
     .environment(RecapViewModel())
@@ -192,7 +222,7 @@ struct SessionScreen: View {
     let result = ScanRecord(chickenNumber: 61, freshness: .fresh)
 
     SessionScreen(session: session)
-    .environment(BluetoothViewModel<ElectrodeSensor>())
+    .environment(BluetoothViewModel<ElectrodeSensor>(bluetoothManager: FakeBluetoothManager()))
     .environment(FreshnessViewModel())
     .environment(PageStateViewModel())
     .environment(RecapViewModel())
@@ -204,7 +234,7 @@ struct SessionScreen: View {
     })
 
     SessionScreen(session: session)
-    .environment(BluetoothViewModel<ElectrodeSensor>())
+    .environment(BluetoothViewModel<ElectrodeSensor>(bluetoothManager: FakeBluetoothManager()))
     .environment(FreshnessViewModel())
     .environment(PageStateViewModel())
     .environment(RecapViewModel())
@@ -217,7 +247,7 @@ struct SessionScreen: View {
     let result = ScanRecord(chickenNumber: 61, freshness: .notFresh)
 
     SessionScreen(session: session)
-    .environment(BluetoothViewModel<ElectrodeSensor>())
+    .environment(BluetoothViewModel<ElectrodeSensor>(bluetoothManager: FakeBluetoothManager()))
     .environment(FreshnessViewModel())
     .environment(PageStateViewModel())
     .environment(RecapViewModel())
