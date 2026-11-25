@@ -52,18 +52,18 @@ extension SessionScreen {
         case .preparing, .connectionFailed:
             machineActions
 
-        case .result(_, let freshness):
+        case .result:
             Button {
                 sessionVM.rescanLast()
             } label: {
                 Text("Coba Lagi")
                     .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.glassProminent)
+            // clear glass over the verdict colour: the filled white slab fought the panel
+            .buttonStyle(.glass)
             .buttonBorderShape(.capsule)
             .controlSize(.large)
             .tint(.white)
-            .foregroundStyle(freshness.tint)
             // long, but inset so it sits under the instruction rather than edge to edge
             .padding(.horizontal, 24)
 

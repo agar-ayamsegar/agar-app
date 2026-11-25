@@ -130,14 +130,15 @@ struct SessionScreen: View {
             // nothing to end while the machine is still coming up, so it is invisible and
             // untouchable rather than absent: dropping it outright let the panel above grow
             // into the gap, which moved the action sitting at the foot of that panel
+            let title = isHolding || holdEnded ? "Terus Tahan…" : "Tahan Untuk Akhiri Sesi"
+
             Group {
-                Text(isHolding || holdEnded ? "Terus Tahan…" : "Tahan Untuk Akhiri Sesi")
+                Text(title)
                     .font(.headline)
-                    .foregroundStyle(holdProgress > 0 ? Color.white : Color.primary)
+                    .foregroundStyle(Color.primary)
                     .contentTransition(.opacity)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 18)
-                    .glassEffect(.regular.interactive(), in: .capsule)
                     .background {
                         // red sweeps in from the left over the hold
                         Rectangle()
@@ -145,6 +146,20 @@ struct SessionScreen: View {
                             .scaleEffect(x: holdProgress, anchor: .leading)
                             .clipShape(.capsule)
                     }
+                    // the letters turn white exactly where the red has reached. switching the
+                    // whole label on holdProgress > 0 fed a Color into the two second linear
+                    // animation, so it crawled through grey the entire hold
+                    .overlay {
+                        Text(title)
+                            .font(.headline)
+                            .foregroundStyle(.white)
+                            .mask {
+                                Rectangle().scaleEffect(x: holdProgress, anchor: .leading)
+                            }
+                    }
+                    // glass goes on last so it sits behind the sweep: under the glass the red
+                    // came through blurred and washed out
+                    .glassEffect(.regular.interactive(), in: .capsule)
                     .contentShape(.capsule)
                     .scaleEffect(isHolding ? 0.96 : 1)
                     .animation(.spring(duration: 0.25), value: isHolding)
