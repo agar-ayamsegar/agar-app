@@ -21,10 +21,6 @@ struct HomeScreen: View {
         sessions.filter { Calendar.current.isDate($0.startedAt, inSameDayAs: viewModel.selectedDate) }
     }
 
-    var selectedSession: ScanSession? {
-        filteredSessions.first { $0.id == viewModel.selectedSessionID } ?? filteredSessions.first
-    }
-
     // takes the session it is given: this used to read selectedSession, so opening any card
     // showed the first session's rows rather than the one that was tapped
     func records(for session: ScanSession) -> [ScanRecord] {
@@ -34,10 +30,10 @@ struct HomeScreen: View {
     }
 
     var body: some View {
-        if let session = selectedSession {
-            recap(session)
-        } else {
+        if filteredSessions.isEmpty {
             emptyState
+        } else {
+            recap
         }
     }
 }
@@ -52,7 +48,7 @@ private extension HomeScreen {
         } label: {
             Label {
                 if Calendar.current.isDateInToday(viewModel.selectedDate) {
-                    Text("Today")
+                    Text("Hari Ini")
                 } else {
                     Text(viewModel.selectedDate, format: .dateTime.day().month(.abbreviated).year())
                 }
@@ -141,14 +137,12 @@ private struct DetailBackButton: View {
 
 // MARK: - recap: session list + selected session detail
 private extension HomeScreen {
-    func recap(_ session: ScanSession) -> some View {
+    var recap: some View {
         VStack(spacing: 16) {
-            // the list runs full width so its scroll bar rides the screen edge, so only the
-            // header is inset here; everything else keeps the same 16
             header
                 .padding(.horizontal, 16)
 
-            sessionList(selected: session)
+            sessionList
         }
         .padding(.top, 8)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -160,29 +154,26 @@ private extension HomeScreen {
         .toolbar(.hidden, for: .navigationBar)
     }
 
-    func sessionList(selected: ScanSession) -> some View {
-        ZStack(alignment: .top) {
-            // the panel sits behind and does not scroll, so the indicator lands on the
-            // screen edge rather than inside the white card
-            RoundedRectangle(cornerRadius: 24)
-                .fill(.white)
-                .padding(.horizontal, 16)
-
-            ScrollView {
-                LazyVStack(spacing: 10) {
-                    ForEach(filteredSessions) { session in
-                        NavigationLink {
-                            sessionDetail(session)
-                        } label: {
-                            SessionCard(session: session)
-                        }
-                        .buttonStyle(.plain)
+    var sessionList: some View {
+        ScrollView {
+            LazyVStack(spacing: 10) {
+                ForEach(filteredSessions) { session in
+                    NavigationLink {
+                        sessionDetail(session)
+                    } label: {
+                        SessionCard(session: session)
                     }
+                    .buttonStyle(.plain)
                 }
-                .padding(.horizontal, 28)
-                .padding(.vertical, 14)
             }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 14)
         }
+        .background(.white)
+        // clips the scrolling cards to the panel: without it a card's square corners ran
+        // past the rounded top and bottom of the white card
+        .clipShape(.rect(cornerRadius: 24))
+        .padding(.horizontal, 16)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
