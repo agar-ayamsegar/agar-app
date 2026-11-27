@@ -14,7 +14,7 @@ struct SessionSummaryScreen: View {
     var body: some View {
         VStack(spacing: 20) {
             Text("Sesi Selesai")
-                .font(.system(size: 44, weight: .bold))
+                .font(.system(size: 44, weight: .bold).width(.expanded))
 
             ChickenIllustration(pose: .done, height: 200)
 
@@ -61,7 +61,7 @@ struct SessionSummaryScreen: View {
 
     private func statValue(_ value: Int) -> some View {
         Text("\(value)")
-            .font(.system(size: 28, weight: .bold))
+            .font(.system(size: 28, weight: .black).width(.expanded))
             .contentTransition(.numericText())
             .frame(maxWidth: .infinity)
     }

@@ -18,9 +18,10 @@ final class FakeBluetoothManager: IBluetoothManager {
     /// Long enough that the preparing panel gets seen instead of flashing past.
     static let handshake: Duration = .seconds(1.2)
 
-    /// Rows with the probe out between birds. `collect()` needs at least one to let go of the
-    /// chicken it just judged; the rest are the operator reaching for the next one.
-    static let rowsBetweenChickens = 3
+    /// Rows with the probe out before each bird. `collect()` needs at least one to let go of
+    /// the chicken it just judged; the rest are the operator reaching for the next one, and
+    /// they are what holds the panel on "Mesin Siap Digunakan" long enough to be read.
+    static let rowsBetweenChickens = 5
 
     /// Nothing across the pins reads about as high as an open circuit.
     static let openProbeOhm: Float = 4000
@@ -66,9 +67,14 @@ final class FakeBluetoothManager: IBluetoothManager {
     func observeDisconnection(onDisconnect: @escaping () -> Void) {}
 
     /// The whole loop, flattened to the lines the firmware would have sent.
+    ///
+    /// Probe out first, then the stab. Trailing the gap instead opened the script in the
+    /// middle of a bird, so the first row off a fresh connection already read `chicken`: the
+    /// panel went from Menyiapkan Mesin straight to Sedang Menganalisa and Mesin Siap
+    /// Digunakan was never on screen. Real hardware idles open while the operator reaches.
     private static let rows: [String] = Fake.chickenOhms.flatMap { ohm in
-        stab(ohm: ohm)
-            + Array(repeating: row(ohm: openProbeOhm, chicken: false), count: rowsBetweenChickens)
+        Array(repeating: row(ohm: openProbeOhm, chicken: false), count: rowsBetweenChickens)
+            + stab(ohm: ohm)
     }
 
     /// One stab: the rows the grade is taken from, plus one more because the probe stays in a

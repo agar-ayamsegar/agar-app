@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct SessionScreen: View {
     @Environment(BluetoothViewModel<ElectrodeSensor>.self) var bluetoothVM
@@ -13,6 +14,7 @@ struct SessionScreen: View {
     @Environment(PageStateViewModel.self) var pageStateVM
     @Environment(RecapViewModel.self) var recapVM
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.modelContext) private var modelContext
 
     @State var sessionVM: SessionViewModel
     @State private var showSessionList = false
@@ -41,7 +43,10 @@ struct SessionScreen: View {
                 // newest scan on top, the way the mock reads. sorted rather than reversed:
                 // swiftdata does not promise an order for a to-many relationship, so
                 // reversing it only reversed whatever order the store happened to hand back
-                RecordTable(records: sessionVM.session.records.sorted { $0.scannedAt > $1.scannedAt })
+                RecordTable(
+                    records: sessionVM.session.records.sorted { $0.scannedAt > $1.scannedAt },
+                    onDelete: modelContext.delete
+                )
             }
             .animation(.default, value: sessionVM.session.totalCount)
             .padding(.horizontal, 16)
@@ -211,6 +216,7 @@ struct SessionScreen: View {
     .environment(FreshnessViewModel())
     .environment(PageStateViewModel())
     .environment(RecapViewModel())
+    .modelContainer(for: ScanSession.self, inMemory: true)
 }
 
 #Preview("Ready") {
@@ -219,6 +225,7 @@ struct SessionScreen: View {
     .environment(FreshnessViewModel())
     .environment(PageStateViewModel())
     .environment(RecapViewModel())
+    .modelContainer(for: ScanSession.self, inMemory: true)
 }
 
 #Preview("Scanning") {
@@ -230,6 +237,7 @@ struct SessionScreen: View {
     .environment(FreshnessViewModel())
     .environment(PageStateViewModel())
     .environment(RecapViewModel())
+    .modelContainer(for: ScanSession.self, inMemory: true)
 }
 
 #Preview("Fresh") {
@@ -243,6 +251,7 @@ struct SessionScreen: View {
     .environment(FreshnessViewModel())
     .environment(PageStateViewModel())
     .environment(RecapViewModel())
+    .modelContainer(for: ScanSession.self, inMemory: true)
 }
 
 #Preview("Next Chicken") {
@@ -255,6 +264,7 @@ struct SessionScreen: View {
     .environment(FreshnessViewModel())
     .environment(PageStateViewModel())
     .environment(RecapViewModel())
+    .modelContainer(for: ScanSession.self, inMemory: true)
 }
 
 #Preview("Not Fresh") {
@@ -268,6 +278,7 @@ struct SessionScreen: View {
     .environment(FreshnessViewModel())
     .environment(PageStateViewModel())
     .environment(RecapViewModel())
+    .modelContainer(for: ScanSession.self, inMemory: true)
 }
 
 #endif
