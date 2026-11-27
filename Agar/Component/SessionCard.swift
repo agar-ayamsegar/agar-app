@@ -11,57 +11,54 @@ struct SessionCard: View {
     let session: ScanSession
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            VStack(alignment: .leading, spacing: 10) {
-                Text("Sesi #\(session.number)")
-                    .font(.system(size: 17, weight: .bold))
-
+        HStack {
+            VStack(alignment: .leading) {
+                Text(verbatim: "Sesi #\(session.number)")
+                    .font(.system(size: 16, weight: .bold))
+                
+                Spacer()
+                
                 HStack(alignment: .lastTextBaseline, spacing: 6) {
                     Text("\(session.totalCount)")
-                        .font(.system(size: 40, weight: .black).width(.expanded))
+                        .font(.system(size: 34, weight: .black).width(.expanded))
                         .contentTransition(.numericText())
 
                     Text("Ayam")
                         .font(.system(size: 16, weight: .black).width(.expanded))
                 }
                 .lineLimit(1)
-                .minimumScaleFactor(0.6)
             }
-
-            Spacer(minLength: 12)
-
-            // date over the counts sharing one left edge, the way the sketch has them.
-            // right-aligning the date instead left it starting short of the labels below it
-            VStack(alignment: .leading, spacing: 12) {
+            
+            Spacer()
+            
+            VStack(alignment: .leading) {
                 Text(session.startedAt, format: .dateTime.day().month(.wide).year())
+                    .font(.system(size: 11, weight: .thin))
 
-                // the counts sit at the foot of the card, level with the big number, rather
-                // than riding up under the date and leaving the bottom corner empty
-                Spacer(minLength: 8)
-
-                // a grid, so the colons sit under each other rather than ragging off the
-                // length of the label in front of them
+                Spacer()
+                
                 Grid(alignment: .leading, horizontalSpacing: 4, verticalSpacing: 2) {
                     GridRow {
                         Text("Segar")
-                        Text(": \(session.freshCount)")
+                        Text(verbatim: ": \(session.freshCount)")
                     }
                     GridRow {
                         Text("Tidak Segar")
-                        Text(": \(session.notFreshCount)")
+                        Text(verbatim: ": \(session.notFreshCount)")
                     }
                 }
+                .font(.system(size: 11, weight: .thin))
+                .padding(.bottom, 4)
+                .padding(.trailing, 7)
             }
-            .font(.system(size: 11))
-            .foregroundStyle(.secondary)
-            .fixedSize(horizontal: true, vertical: false)
         }
-        .padding(.horizontal, 16)
+        .frame(height: 90)
+        .padding(.horizontal, 14)
         .padding(.vertical, 14)
         .background(.white, in: .rect(cornerRadius: 18))
         .overlay {
             RoundedRectangle(cornerRadius: 18)
-                .strokeBorder(Color.cardGray, lineWidth: 1.5)
+                .strokeBorder(Color.black.opacity(0.2), lineWidth: 1.5)
         }
         .contentShape(.rect)
     }

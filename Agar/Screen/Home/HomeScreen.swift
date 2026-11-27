@@ -17,6 +17,8 @@ struct HomeScreen: View {
     @State private var bidingstatus = false
 
     @State private var showsDatePicker = false
+    // held rather than deleted on the spot: a session takes every bird in it with it
+    @State private var sessionToDelete: ScanSession?
     var filteredSessions: [ScanSession] {
         sessions.filter { Calendar.current.isDate($0.startedAt, inSameDayAs: viewModel.selectedDate) }
     }
@@ -175,6 +177,17 @@ private extension HomeScreen {
         .clipShape(.rect(cornerRadius: 24))
         .padding(.horizontal, 16)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .confirmationDialog(
+            "Hapus sesi ini?",
+            isPresented: Binding(get: { sessionToDelete != nil }, set: { if !$0 { sessionToDelete = nil } }),
+            presenting: sessionToDelete
+        ) { session in
+            Button("Hapus Sesi #\(session.number)", role: .destructive) {
+                modelContext.delete(session)
+            }
+        } message: { session in
+            Text("\(session.totalCount) ayam di sesi ini ikut terhapus.")
+        }
     }
 
     func sessionDetail(_ session: ScanSession) -> some View {
@@ -197,7 +210,8 @@ private extension HomeScreen {
 
             RecordTable(
                 records: records(for: session),
-                filter: $viewModel.recordFilter
+                filter: $viewModel.recordFilter,
+                onDelete: modelContext.delete
             )
         }
         .padding(.horizontal, 16)

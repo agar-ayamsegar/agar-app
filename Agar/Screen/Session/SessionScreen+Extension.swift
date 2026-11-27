@@ -89,7 +89,7 @@ extension SessionScreen {
             }
 
             Text(title)
-                .font(.system(size: 40, weight: .bold))
+                .font(.system(size: 34, weight: .black).width(.expanded))
                 .multilineTextAlignment(.center)
                 .minimumScaleFactor(0.6)
                 .lineLimit(2)
@@ -153,7 +153,9 @@ extension SessionScreen {
 
     var ready: some View {
         VStack(spacing: 8) {
-            headline(title: "Mesin Siap Digunakan")
+            Text("Mesin Siap Digunakan")
+                .font(.system(size: 16, weight: .light))
+            headline(title: "Tusukkan Mesin Ke Daging")
             ChickenIllustration(pose: .ready, height: 300)
         }
     

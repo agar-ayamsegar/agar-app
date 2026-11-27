@@ -15,6 +15,8 @@ import SwiftUI
 struct RecordTable: View {
     let records: [ScanRecord]
     var filter: Binding<Freshness?>?
+    /// Long press a row to drop a scan that should not have been recorded.
+    var onDelete: (ScanRecord) -> Void
 
     /// Keeps the column titles lined up under the segmented control above them rather than
     /// sitting further in than it.
@@ -45,6 +47,12 @@ struct RecordTable: View {
                         LazyVStack(spacing: 0) {
                             ForEach(records) { record in
                                 row(record)
+                                    .contentShape(.rect)
+                                    .contextMenu {
+                                        Button("Hapus", systemImage: "trash", role: .destructive) {
+                                            onDelete(record)
+                                        }
+                                    }
 
                                 if record.id != records.last?.id {
                                     Divider().padding(.horizontal, columnInset)
@@ -103,14 +111,15 @@ struct RecordTable: View {
             ScanRecord(chickenNumber: $0, scannedAt: .now.addingTimeInterval(Double($0) * 18),
                        freshness: $0.isMultiple(of: 4) ? .notFresh : .fresh)
         },
-        filter: $filter
+        filter: $filter,
+        onDelete: { _ in }
     )
     .padding()
     .background(Color.surfaceCream)
 }
 
 #Preview("empty") {
-    RecordTable(records: [])
+    RecordTable(records: []) { _ in }
         .padding()
         .background(Color.surfaceCream)
 }
